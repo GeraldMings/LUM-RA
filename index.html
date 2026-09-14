@@ -1,1 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <title>Luméra — Your Skin. Understood.</title>
+
+  <meta name="description" content="Luméra helps you understand your skin with intelligent skin analysis and personalized skincare guidance.">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- NAVIGATION -->
+  <header class="navbar">
+    <div class="logo">Luméra<span>✦</span></div>
+
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#about">About</a>
+    </nav>
+
+    <a href="#scan" class="nav-button">Scan My Face</a>
+  </header>
+
+
+  <!-- HERO -->
+  <section id="home" class="hero">
+
+    <div class="hero-content">
+
+      <p class="eyebrow">LUMÉRA BY GEESTABLISH</p>
+
+      <h1>Your Skin.<br><span>Understood.</span></h1>
+
+      <p class="hero-text">
+        Discover what your skin needs with intelligent skin analysis,
+        personalized skincare guidance and carefully matched products.
+      </p>
+
+      <div class="hero-buttons">
+        <a href="#scan" class="primary-button">Scan My Face</a>
+        <a href="#how-it-works" class="secondary-button">Discover Luméra</a>
+      </div>
+
+      <p class="hero-note">AI-powered skincare guidance • Private • Personalized</p>
+
+    </div>
+
+    <div class="hero-visual">
+      <div class="glow"></div>
+
+      <div class="face-card">
+        <div class="scan-line"></div>
+        <div class="face-outline">◯</div>
+        <p>LIVE SKIN ANALYSIS</p>
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- HOW IT WORKS -->
+  <section id="how-it-works" class="section">
+
+    <p class="eyebrow">HOW IT WORKS</p>
+
+    <h2>Understand your skin<br>in a few simple steps.</h2>
+
+    <div class="steps">
+
+      <div class="step-card">
+        <div class="step-number">01</div>
+        <h3>Create Your Account</h3>
+        <p>Create your secure Luméra account so your skin journey can be saved.</p>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">02</div>
+        <h3>Start Your Scan</h3>
+        <p>Give Luméra permission to use your camera and position your face inside the guide.</p>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">03</div>
+        <h3>Understand Your Skin</h3>
+        <p>Receive a skin score, visible concerns and personalized skincare guidance.</p>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">04</div>
+        <h3>Check Back</h3>
+        <p>Return for another check-in around 3 days later and track your progress.</p>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- SCAN -->
+  <section id="scan" class="scan-section">
+
+    <div class="scan-content">
+
+      <p class="eyebrow">LUMÉRA AI SKIN SCAN</p>
+
+      <h2>Ready to understand<br>your skin?</h2>
+
+      <p>
+        Luméra uses your device's camera to perform a live facial skin analysis.
+        Camera access will only begin after you give permission.
+      </p>
+
+      <button class="primary-button" onclick="startScan()">
+        📷 Allow Camera & Start Scan
+      </button>
+
+      <p class="small-text">
+        Your camera will only be accessed after you give permission.
+      </p>
+
+    </div>
+
+    <div class="camera-preview" id="cameraPreview">
+
+      <div class="camera-guide">
+        <div class="face-guide"></div>
+        <p>Position your face inside the guide</p>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- PRICING -->
+  <section id="pricing" class="section">
+
+    <p class="eyebrow">LUMÉRA PLANS</p>
+
+    <h2>Choose your skin journey.</h2>
+
+    <div class="pricing">
+
+      <div class="price-card">
+
+        <p class="plan-name">PAY-AS-YOU-GO</p>
+
+        <h3>GH₵5</h3>
+
+        <p class="price-description">3 skin-analysis tries</p>
+
+        <ul>
+          <li>✓ Live face scan</li>
+          <li>✓ Skin score 1–10</li>
+          <li>✓ Visible skin concerns</li>
+          <li>✓ Personalized recommendations</li>
+          <li>✓ Skincare guidance</li>
+        </ul>
+
+        <button class="price-button">Get 3 Scans</button>
+
+      </div>
+
+
+      <div class="price-card featured">
+
+        <div class="popular">POPULAR</div>
+
+        <p class="plan-name">STANDARD</p>
+
+        <h3>Monthly</h3>
+
+        <p class="price-description">For your ongoing skincare journey</p>
+
+        <ul>
+          <li>✓ More skin scans</li>
+          <li>✓ Personalized recommendations</li>
+          <li>✓ Skincare routines</li>
+          <li>✓ Progress tracking</li>
+          <li>✓ Marketplace access</li>
+        </ul>
+
+        <button class="price-button">Choose Standard</button>
+
+      </div>
+
+
+      <div class="price-card">
+
+        <p class="plan-name">PRO</p>
+
+        <
