@@ -1,2 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Luméra — AI-powered skincare intelligence and personalized skincare guidance.">
+  <title>Luméra — Your Skin. Understood.</title>
 
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #08070c;
+      color: #fff;
+      line-height: 1.6;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      min-height: 70px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 7%;
+      background: rgba(8,7,12,.96);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+
+    .logo {
+      font-family: Georgia, serif;
+      font-size: 30px;
+      letter-spacing: 1px;
+    }
+
+    .logo span {
+      color: #a96cff;
+    }
+
+    nav a {
+      color: #ccc;
+      text-decoration: none;
+      margin-left: 24px;
+      font-size: 14px;
+    }
+
+    nav a:hover {
+      color: #b983ff;
+    }
+
+    .hero {
+      min-height: 700px;
+      padding: 70px 7%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 50px;
+      align-items: center;
+      background:
+        radial-gradient(circle at 75% 40%, rgba(137,72,255,.2), transparent 38%),
+        #08070c;
+    }
+
+    .eyebrow {
+      color: #b983ff;
+      letter-spacing: 4px;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-family: Georgia, serif;
+      font-size: clamp(48px, 7vw, 82px);
+      line-height: 1;
+      margin: 20px 0;
+    }
+
+    h1 span {
+      color: #b983ff;
+    }
+
+    .hero p {
+      color: #b8b2c1;
+      font-size: 18px;
+      max-width: 570px;
+      margin-bottom: 30px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 50px;
+      padding: 16px 28px;
+      background: linear-gradient(90deg,#8b4cff,#b77cff);
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 10px 35px rgba(139,76,255,.25);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .hero-image img,
+    .journey-image img {
+      width: 100%;
+      display: block;
+      border-radius: 24px;
+      border: 1px solid rgba(183,131,255,.25);
+      box-shadow: 0 20px 70px rgba(0,0,0,.55);
+    }
+
+    section {
+      padding: 85px 7%;
+    }
+
+    .section-title {
+      max-width: 720px;
+      text-align: center;
+      margin: 0 auto 50px;
+    }
+
+    .section-title h2 {
+      font-family: Georgia, serif;
+      font-size: 42px;
+      margin-bottom: 12px;
+    }
+
+    .section-title p {
+      color: #aaa5b4;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 22px;
+    }
+
+    .card {
+      background: #121019;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 20px;
+      padding: 30px;
+    }
+
+    .number {
+      color: #b983ff;
+      letter-spacing: 2px;
+      font-size: 13px;
+    }
+
+    .card h3 {
+      margin: 14px 0 8px;
+    }
+
+    .card p {
+      color: #aaa5b4;
+      font-size: 14px;
+    }
+
+    /* SCAN */
+
+    #scan {
+      background: #0d0a14;
+    }
+
+    .scan-box {
+      max-width: 850px;
+      margin: auto;
+      padding: 45px;
+      text-align: center;
+      border-radius: 25px;
+      background: #121019;
+      border: 1px solid rgba(183,131,255,.25);
+    }
+
+    .scan-box h2 {
+      font-family: Georgia, serif;
+      font-size: 42px;
+      margin-bottom: 12px;
+    }
+
+    .scan-box p {
+      color: #aaa5b4;
+      margin-bottom: 25px;
+    }
+
+    .camera-container {
+      display: none;
+      max-width: 500px;
+      margin: 30px auto 0;
+      position: relative;
+    }
+
+    video {
+      width: 100%;
+      border-radius: 22px;
+      background: #000;
+      transform: scaleX(-1);
+    }
+
+    .face-guide {
+      position: absolute;
+      width: 55%;
+      height: 75%;
+      left: 22.5%;
+      top: 12.5%;
+      border: 2px solid #b983ff;
+      border-radius: 50%;
+      box-shadow: 0 0 30px rgba(183,131,255,.4);
+      pointer-events: none;
+    }
+
+    .camera-message {
+      margin-top: 15px;
+      color: #c5a5ff;
+    }
+
+    .close-btn {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border-radius: 30px;
+      background: transparent;
+      color: white;
+      border: 1px solid #51495d;
+    }
+
+    #cameraError {
+      display: none;
+      color: #ff9d9d;
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    /* RESULTS */
+
+    .result-box {
+      display: none;
+      margin: 30px auto 0;
+      max-width: 600px;
+      padding: 25px;
+      background: #181421;
+      border-radius: 20px;
+      border: 1px solid rgba(183,131,255,.2);
+    }
+
+    .score {
+      font-size: 60px;
+      font-weight: bold;
+      color: #b983ff;
+    }
+
+    /* JOURNEYS */
+
+    .journey-section {
+      background: #09070e;
+    }
+
+    .journey-image {
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .disclaimer {
+      text-align: center;
+      color: #77717e;
+      font-size: 12px;
+      margin-top: 18px;
+    }
+
+    /* CARE */
+
+    .care-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    .care-card {
+      background: #121019;
+      padding: 30px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .care-card h3 {
+      font-family: Georgia, serif;
+      font-size: 26px;
+      margin-bottom: 15px;
+    }
+
+    .care-card p {
+      color: #aaa5b4;
+      margin-bottom: 15px;
+    }
+
+    .care-list {
+      list-style: none;
+    }
+
+    .care-list li {
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      color: #ccc7d2;
+    }
+
+    .care-list li::before {
+      content: "✦";
+      color: #b983ff;
+      margin-right: 10px;
+    }
+
+    /* PRODUCTS */
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 22px;
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    .product-card {
+      background: #121019;
+      padding: 25px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .product-icon {
+      font-size: 30px;
+    }
+
+    .product-card h3 {
+      margin: 12px 0 7px;
+    }
+
+    .product-card p {
+      color: #aaa5b4;
+      font-size: 14px;
+    }
+
+    .product-tag {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 5px 10px;
+      border-radius: 20px;
+      background: rgba(155,92,255,.15);
+      color: #c7a4ff;
+      font-size: 11px;
+    }
+
+    /* PRICING */
+
+    .pricing {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 22px;
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    .price-card {
+      position: relative;
+      background: #121019;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 22px;
+      padding: 30px;
+    }
+
+    .price-card.featured {
+      border-color: #a66cff;
+      box-shadow: 0 15px 60px rgba(123,61,255,.15);
+    }
+
+    .badge {
+      position: absolute;
+      top: 17px;
+      right: 17px;
+      padding: 5px 10px;
+      border-radius: 20px;
+      background: #8d4dff;
+      font-size: 10px;
+    }
+
+    .price {
+      font-size: 35px;
+      font-weight: bold;
+      margin: 15px 0;
+    }
+
+    .price-list {
+      list-style: none;
+      margin-top: 20px;
+    }
+
+    .price-list li {
+      margin: 12px 0;
+      color: #c3becb;
+      font-size: 14px;
+    }
+
+    .price-list li::before {
+      content: "✓";
+      color: #b983ff;
+      margin-right: 10px;
+    }
+
+    footer {
+      padding: 45px 7%;
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,.08);
+      color: #77717e;
+      font-size: 13px;
+    }
+
+    @media(max-width:850px) {
+      nav a {
+        display: none;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-image {
+        order: -1;
+      }
+
+      .cards,
+      .pricing,
+      .product-grid,
+      .care-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .scan-box {
+        padding: 30px 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<nav>
+  <div class="logo">Lum<span>é</span>ra</div>
+
+  <div>
+    <a href="#how">How It Works</a>
+    <a href="#scan">Scan</a>
+    <a href="#care">Care</a>
+    <a href="#products">Products</a>
+    <a href="#pricing">Pricing</a>
+  </div>
+</nav>
+
+
+<!-- HERO -->
+
+<section class="hero">
+
+  <div>
+    <div class="eyebrow">Skincare Intelligence</div>
+
+    <h1>
+      Your Skin.<br>
+      <span>Understood.</span>
+    </h1>
+
+    <p>
+      Luméra helps you understand your visible skin concerns,
+      discover personalized skincare guidance and find products
+      that may suit your skin.
+    </p>
+
+    <button class="btn" onclick="startScan()">
+      📷 Scan My Face →
+    </button>
+  </div>
+
+  <div class="hero-image">
+    <img src="lumera-beauty.png"
+         alt="Luméra skincare before and after concept">
+  </div>
+
+</section>
+
+
+<!-- HOW IT WORKS -->
+
+<section id="how">
+
+  <div class="section-title">
+    <h2>Beauty, powered by intelligence.</h2>
+    <p>
+      Luméra combines facial scanning, personalized guidance
+      and skincare discovery in one experience.
+    </p>
+  </div>
+
+  <div class="cards">
+
+    <div class="card">
+      <div class="number">01</div>
+      <h3>Scan Your Face</h3>
+      <p>
+        Use your phone's front camera and position your face
+        inside the Luméra guide.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="number">02</div>
+      <h3>Understand Your Skin</h3>
+      <p>
+        Luméra can provide an easy-to-understand score and
+        highlight visible skin characteristics and concerns.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="number">03</div>
+      <h3>Build Your Routine</h3>
+      <p>
+        Discover gentle care ideas and product recommendations
+        matched to your analysis.
+      </p>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- FACE SCAN -->
+
+<section id="scan">
+
+  <div class="scan-box">
+
+    <h2>Scan My Face</h2>
+
+    <p>
+      Allow camera access and position your face inside the guide.
+      Your Luméra skincare analysis starts here.
+    </p>
+
+    <button class="btn" onclick="startScan()">
+      📷 Open Face Scanner
+    </button>
+
+    <div id="cameraContainer" class="camera-container">
+
+      <video id="camera" autoplay playsinline></video>
+
+      <div class="face-guide"></div>
+
+      <div class="camera-message">
+        Position your face inside the guide
+      </div>
+
+      <button class="close-btn" onclick="stopCamera()">
+        Close Camera
+      </button>
+
+    </div>
+
+    <div id="cameraError"></div>
+
+    <div id="resultBox" class="result-box">
+
+      <div>Example Luméra Skin Score</div>
+
+      <div class="score">8/10</div>
+
+      <p>
+        Your actual score will be generated after the
+        Luméra AI analysis system is connected.
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- BEFORE & AFTER -->
+
+<section class="journey-section">
+
+  <div class="section-title">
+
+    <h2>Skin Journeys</h2>
+
+    <p>
+      Different skin concerns require different approaches.
+      These visuals are illustrative examples, not guaranteed results.
+    </p>
+
+  </div>
+
+  <div class="journey-image">
+
+    <img src="lumera-journeys.png"
+         alt="Luméra illustrative skincare journeys">
+
+  </div>
+
+  <div class="disclaimer">
+    Illustrative examples only. Individual skincare results vary.
+  </div>
+
+</section>
+
+
+<!-- NATURAL CARE -->
+
+<section id="care">
+
+  <div class="section-title">
+
+    <h2>Start with gentle care.</h2>
+
+    <p>
+      Luméra can also suggest simple, skin-friendly habits
+      alongside product recommendations.
+    </p>
+
+  </div>
+
+  <div class="care-grid">
+
+    <div class="care-card">
+
+      <h3>🌿 Natural & Gentle Care</h3>
+
+      <p>
+        Simple habits that may help support comfortable,
+        healthy-looking skin.
+      </p>
+
+      <ul class="care-list">
+        <li>Cool compress for temporary soothing</li>
+        <li>Gentle cleansing without harsh scrubbing</li>
+        <li>Simple fragrance-free moisturization</li>
+        <li>Aloe-based products if your skin tolerates them</li>
+        <li>Daily sun protection</li>
+      </ul>
+
+    </div>
+
+    <div class="care-card">
+
+      <h3>⚠️ What to Avoid</h3>
+
+      <p>
+        More is not always better when caring for your skin.
+      </p>
+
+      <ul class="care-list">
+        <li>Avoid putting ice directly on your skin</li>
+        <li>Avoid harsh physical scrubs</li>
+        <li>Avoid squeezing pimples</li>
+        <li>Avoid trying many new products at once</li>
+        <li>Stop a product if it causes significant irritation</li>
+      </ul>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- PRODUCTS -->
+
+<section id="products">
+
+  <div class="section-title">
+
+    <h2>Products that fit your skin.</h2>
+
+    <p>
+      Luméra can recommend products based on your analysis.
+      Brand availability and recommendations may change over time.
+    </p>
+
+  </div>
+
+  <div class="product-grid">
+
+    <div class="product-card">
+
+      <div class="product-icon">🧴</div>
+
+      <h3>Anua</h3>
+
+      <p>
+        Explore suitable Anua skincare products when their
+        ingredients and purpose match your skincare needs.
+      </p>
+
+      <span class="product-tag">PERSONALIZED MATCH</span>
+
+    </div>
+
+
+    <div class="product-card">
+
+      <div class="product-icon">✨</div>
+
+      <h3>Medicube</h3>
+
+      <p>
+        Discover suitable Medicube products based on the
+        concerns identified by your Luméra analysis.
+      </p>
+
+      <span class="product-tag">PERSONALIZED MATCH</span>
+
+    </div>
+
+
+    <div class="product-card">
+
+      <div class="product-icon">💧</div>
+
+      <h3>More Brands</h3>
+
+      <p>
+        Luméra will continue expanding its skincare marketplace
+        with more trusted brands and approved vendors.
+      </p>
+
+      <span class="product-tag">COMING SOON</span>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- PRICING -->
+
+<section id="pricing">
+
+  <div class="section-title">
+
+    <h2>Your Luméra experience.</h2>
+
+    <p>
+      Start with pay-as-you-go access or choose a membership
+      when the full Luméra platform launches.
+    </p>
+
+  </div>
+
+  <div class="pricing">
+
+    <!-- PAY AS YOU GO -->
+
+    <div class="price-card">
+
+      <h3>Pay As You Go</h3>
+
+      <div class="price">
+        GH₵5
+      </div>
+
+      <p>3 face-analysis tries.</p>
+
+      <ul class="price-list">
+        <li>3 scan attempts</li>
+        <li>AI skin analysis</li>
+        <li>Skin score 1–10</li>
+        <li>Visible concern insights</li>
+        <li>Product recommendations</li>
+      </ul>
+
+    </div>
+
+
+    <!-- STANDARD -->
+
+    <div class="price-card featured">
+
+      <div class="badge">POPULAR</div>
+
+      <h3>Standard</h3>
+
+      <div class="price">
+        Coming Soon
+      </div>
+
+      <p>For regular skincare guidance.</p>
+
+      <ul class="price-list">
+        <li>Regular face analyses</li>
+        <li>Personalized recommendations</li>
+        <li>Skin score tracking</li>
+        <li>Skincare routine guidance</li>
+        <li>Scan history</li>
+        <li>Progress check-ins</li>
+      </ul>
+
+    </div>
+
+
+    <!-- PRO -->
+
+    <div class="price-card">
+
+      <div class="badge">PREMIUM</div>
+
+      <h3>Pro</h3>
+
+      <div class="price">
+        Coming Soon
+      </div>
+
+      <p>For deeper skincare tracking.</p>
+
+      <ul class="price-list">
+        <li>Advanced face analysis</li>
+        <li>Detailed skin insights</li>
+        <li>Personalized recommendations</li>
+        <li>Compare previous scans</li>
+        <li>Long-term progress tracking</li>
+        <li>Personalized routines</li>
+        <li>Priority recommendations</li>
+        <li>Premium Luméra features</li>
+      </ul>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<footer>
+
+  <p>© 2026 Luméra by Geestablish. All rights reserved.</p>
+
+  <p>
+    Luméra provides skincare guidance and is not a medical diagnosis.
+  </p>
+
+</footer>
+
+
+<script>
+
+let cameraStream = null;
+
+
+async function startScan() {
+
+  const cameraContainer =
+    document.getElementById("cameraContainer");
+
+  const video =
+    document.getElementById("camera");
+
+  const error =
+    document.getElementById("cameraError");
+
+  error.style.display = "none";
+  error.innerText = "";
+
+  try {
+
+    if (!navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia) {
+
+      throw new Error("Camera not supported");
+
+    }
+
+    cameraStream =
+      await navigator.mediaDevices.getUserMedia({
+
+        video: {
+          facingMode: {
+            ideal: "user"
+          },
+          width: {
+            ideal: 720
+          },
+          height: {
+            ideal: 720
+          }
+        },
+
+        audio: false
+
+      });
+
+    video.srcObject = cameraStream;
+
+    cameraContainer.style.display = "block";
+
+    cameraContainer.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+
+  }
+
+  catch (err) {
+
+    console.log(err);
+
+    error.style.display = "block";
+
+    if (err.name === "NotAllowedError") {
+
+      error.innerText =
+        "Camera permission was denied. Please allow camera access in your browser settings and try again.";
+
+    }
+
+    else if (err.name === "NotFoundError") {
+
+      error.innerText =
+        "No camera was found on this device.";
+
+    }
+
+    else {
+
+      error.innerText =
+        "Luméra could not access your camera. Make sure you are using HTTPS and allow camera permission.";
+
+    }
+
+  }
+
+}
+
+
+function stopCamera() {
+
+  if (cameraStream) {
+
+    cameraStream.getTracks().forEach(
+      track => track.stop()
+    );
+
+    cameraStream = null;
+
+  }
+
+  const video =
+    document.getElementById("camera");
+
+  video.srcObject = null;
+
+  document.getElementById(
+    "cameraContainer"
+  ).style.display = "none";
+
+}
+
+</script>
+
+</body>
+    </html>
     
