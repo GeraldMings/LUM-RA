@@ -781,7 +781,45 @@ footer p{
 
 }
 
-</style>
+/* Luméra plan cards cleanup */
+.access,
+.plans,
+.pricing,
+.access-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  align-items: stretch;
+}
+
+.access-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.access-card .plan-button,
+.access-card a.plan-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  text-decoration: none;
+  white-space: normal;
+  margin-top: 20px;
+}
+
+@media (max-width: 800px) {
+  .access,
+  .plans,
+  .pricing,
+  .access-grid {
+    grid-template-columns: 1fr;
+  }
+ }</style>
 </head>
 
 
