@@ -1072,6 +1072,9 @@ footer p{
 <section id="scanner" class="scanner-section">
 
   <div class="scanner">
+  <div id="scanCounter" class="scan-counter">
+  ✨ 3 scans remaining
+  </div>
 
     <div class="scanner-header">
 
@@ -1633,6 +1636,18 @@ let cameraStream = null;
 let freeScans = Number(
   localStorage.getItem("lumeraFreeScans") || 0
 );
+  function updateScanCounter() {
+  const counter = document.getElementById("scanCounter");
+  if (!counter) return;
+
+  const remaining = Math.max(0, 3 - freeScans);
+
+  if (remaining > 0) {
+    counter.textContent = `✨ ${remaining} scan${remaining === 1 ? "" : "s"} remaining`;
+  } else {
+    counter.textContent = "✨ 0 scans remaining — Upgrade to continue";
+  }
+  }
 
 
 /* =========================================================
@@ -1936,15 +1951,10 @@ function completeScan(){
     */
 
     if(selectedPlan === "Free Scan"){
-
-      freeScans++;
-
-      localStorage.setItem(
-        "lumeraFreeScans",
-        freeScans
-      );
-
-    }
+  freeScans++;
+  localStorage.setItem("lumeraFreeScans", freeScans);
+  updateScanCounter();
+  }
 
 
     document.getElementById("scoreNumber")
