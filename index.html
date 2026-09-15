@@ -9,7 +9,17 @@
 <meta name="description"
 content="Luméra helps you understand your skin through intelligent facial analysis and personalized skincare recommendations.">
 
-<style>
+ <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const SUPABASE_URL = "https://zvlkrnsvykxnlukmnouf.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_fVf5OZdzYB3HYfUoeEsOLQ_mbx4lBfo";
+
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
+</script><style>
 
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap');
 
