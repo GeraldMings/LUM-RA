@@ -8,6 +8,9 @@ export default async function handler(req, res) {
   }
 
   try {
+    // -----------------------------
+    // 1. Verify Paystack signature
+    // -----------------------------
     const signature = req.headers["x-paystack-signature"];
 
     if (!signature) {
@@ -15,11 +18,6 @@ export default async function handler(req, res) {
         error: "Missing Paystack signature"
       });
     }
-
-    /*
-      Paystack sends the webhook body to us.
-      We verify that the request really came from Paystack.
-    */
 
     const body =
       typeof req.body === "string"
@@ -36,19 +34,19 @@ export default async function handler(req, res) {
 
     if (signature !== hash) {
       return res.status(401).json({
-        error: "Invalid signature"
+        error: "Invalid Paystack signature"
       });
     }
 
+    // -----------------------------
+    // 2. Read Paystack event
+    // -----------------------------
     const event =
       typeof req.body === "string"
         ? JSON.parse(req.body)
         : req.body;
 
-    /*
-      We only process successful payments.
-    */
-
+    // We only process successful payments
     if (event.event !== "charge.success") {
       return res.status(200).json({
         received: true
@@ -64,17 +62,22 @@ export default async function handler(req, res) {
     const currency =
       event.data?.currency;
 
+    const reference =
+      event.data?.reference || null;
+
     if (!email) {
       return res.status(400).json({
         error: "Customer email missing"
       });
     }
 
-    /*
-      LUMÉRA 3-SCAN PASS
-      GH₵5 = 500 pesewas
-    */
+    console.log(
+      `Luméra payment received: ${email} | ${currency} | ${amount}`
+    );
 
+    // -----------------------------
+    // 3. GH₵5 = 3 Scan Pass
+    // -----------------------------
     if (
       currency === "GHS" &&
       amount === 500
@@ -105,12 +108,12 @@ export default async function handler(req, res) {
           await response.text();
 
         console.error(
-          "Supabase error:",
+          "Supabase scan grant error:",
           error
         );
 
         return res.status(500).json({
-          error: "Could not grant scans"
+          error: "Could not grant scan pass"
         });
       }
 
@@ -119,37 +122,107 @@ export default async function handler(req, res) {
       );
     }
 
-    /*
-      STANDARD
-      GH₵100 = 10,000 pesewas
-
-      PRO
-      GH₵300 = 30,000 pesewas
-
-      These payments are detected here,
-      but subscription access will be connected
-      after the Luméra subscription table is added
-      to Supabase.
-    */
-
+    // -----------------------------
+    // 4. GH₵100 = Standard
+    // -----------------------------
     if (
       currency === "GHS" &&
       amount === 10000
     ) {
+      const response = await fetch(
+        `${process.env.SUPABASE_URL}/rest/v1/rpc/grant_lumera_plan`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+
+            apikey:
+              process.env.SUPABASE_SECRET_KEY,
+
+            Authorization:
+              `Bearer ${process.env.SUPABASE_SECRET_KEY}`
+          },
+
+          body: JSON.stringify({
+            p_email: email,
+            p_plan: "standard",
+            p_reference: reference
+          })
+        }
+      );
+
+      if (!response.ok) {
+        const error =
+          await response.text();
+
+        console.error(
+          "Supabase Standard plan error:",
+          error
+        );
+
+        return res.status(500).json({
+          error: "Could not activate Standard plan"
+        });
+      }
+
       console.log(
-        `Luméra Standard payment received from ${email}`
+        `Luméra Standard activated for ${email}`
       );
     }
 
+    // -----------------------------
+    // 5. GH₵300 = Pro
+    // -----------------------------
     if (
       currency === "GHS" &&
       amount === 30000
     ) {
+      const response = await fetch(
+        `${process.env.SUPABASE_URL}/rest/v1/rpc/grant_lumera_plan`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+
+            apikey:
+              process.env.SUPABASE_SECRET_KEY,
+
+            Authorization:
+              `Bearer ${process.env.SUPABASE_SECRET_KEY}`
+          },
+
+          body: JSON.stringify({
+            p_email: email,
+            p_plan: "pro",
+            p_reference: reference
+          })
+        }
+      );
+
+      if (!response.ok) {
+        const error =
+          await response.text();
+
+        console.error(
+          "Supabase Pro plan error:",
+          error
+        );
+
+        return res.status(500).json({
+          error: "Could not activate Pro plan"
+        });
+      }
+
       console.log(
-        `Luméra Pro payment received from ${email}`
+        `Luméra Pro activated for ${email}`
       );
     }
 
+    // -----------------------------
+    // 6. Finished
+    // -----------------------------
     return res.status(200).json({
       received: true
     });
@@ -157,7 +230,7 @@ export default async function handler(req, res) {
   } catch (error) {
 
     console.error(
-      "Webhook error:",
+      "Luméra webhook error:",
       error
     );
 
