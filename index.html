@@ -2254,365 +2254,189 @@ function openPaystackCheckout(plan){
 /* =========================
    SCANNER
 ========================= */
+<script>
+async function completeScan() {
+  if (scanRunning) return;
 
-async function openScanner(){
+  const video = document.getElementById("camera");
 
-  if(!currentUser){
-
-    openAuth("signin");
-
-    return false;
-
-  }
-
-
-  await loadScanCredits();
-
-
-  if(scanCredits <= 0){
-
-    alert(
-      "You have no scan credits. Purchase the 3-Scan Pass or upgrade your plan."
-    );
-
-    document
-      .getElementById("access")
-      .scrollIntoView({
-        behavior:"smooth"
-      });
-
-    return false;
-
-  }
-
-
-  document
-    .getElementById("scanner")
-    .style
-    .display = "block";
-
-
-  document
-    .getElementById("scanner")
-    .scrollIntoView({
-      behavior:"smooth"
-    });
-
-
-  await startCamera();
-
-  return true;
-
-}
-
-
-async function startCamera(){
-
-  const error =
-    document.getElementById(
-      "cameraError"
-    );
-
-
-  error.textContent = "";
-
-
-  try{
-
-    cameraStream =
-      await navigator.mediaDevices.getUserMedia({
-
-        video:{
-          facingMode:{
-            ideal:"user"
-          },
-
-          width:{
-            ideal:720
-          },
-
-          height:{
-            ideal:720
-          }
-        },
-
-        audio:false
-
-      });
-
-
-    document
-      .getElementById("camera")
-      .srcObject =
-        cameraStream;
-
-
-    document
-      .getElementById("scanStatus")
-      .textContent =
-        "Camera ready";
-
-
-    document
-      .getElementById("scanInstruction")
-      .textContent =
-        "Position your face inside the oval.";
-
-
-  }catch(error){
-
-    console.error(error);
-
-
-    document
-      .getElementById("cameraError")
-      .textContent =
-        error.name === "NotAllowedError"
-
-          ? "Camera permission was denied. Allow camera access and try again."
-
-          : "We couldn't access your camera. Check your browser permissions.";
-
-  }
-
-}
-
-
-async function beginGuidedScan(){
-
-  if(!currentUser){
-
-    openAuth("signin");
-
+  if (!video || !video.videoWidth || !video.videoHeight) {
+    alert("Camera is not ready yet. Please wait a moment and try again.");
     return;
-
   }
-
-
-  await loadScanCredits();
-
-
-  if(scanCredits <= 0){
-
-    alert(
-      "No scan credits remaining."
-    );
-
-    return;
-
-  }
-
-
-  if(scanRunning){
-
-    return;
-
-  }
-
 
   scanRunning = true;
 
+  try {
+    // Show scanning message
+    const scoreNumber = document.getElementById("scoreNumber");
+    const concerns = document.getElementById("concerns");
+    const needs = document.getElementById("needs");
+    const routine = document.getElementById("routine");
 
-  const status =
-    document.getElementById(
-      "scanStatus"
-    );
+    if (scoreNumber) scoreNumber.textContent = "…";
+    if (concerns) concerns.textContent = "Analyzing your skin...";
+    if (needs) needs.textContent = "Please wait";
+    if (routine) routine.textContent = "Luméra AI is checking your scan...";
 
+    // Capture the face from the camera
+    const canvas = document.createElement("canvas");
 
-  const instruction =
-    document.getElementById(
-      "scanInstruction"
-    );
+    const size = Math.min(video.videoWidth, video.videoHeight);
 
+    canvas.width = 720;
+    canvas.height = 720;
 
-  const progress =
-    document.getElementById(
-      "scanProgress"
-    );
+    const ctx = canvas.getContext("2d");
 
+    const sx = (video.videoWidth - size) / 2;
+    const sy = (video.videoHeight - size) / 2;
 
-  const button =
-    document.getElementById(
-      "beginAnalysis"
-    );
-
-
-  button.style.display =
-    "none";
-
-
-  const steps = [
-
-    [
-      "Position your face",
-      "Place your face inside the oval and look directly at the camera."
-    ],
-
-    [
-      "Perfect your position",
-      "Move slightly to the LEFT."
-    ],
-
-    [
-      "Perfect your position",
-      "Now shift slightly to the RIGHT."
-    ],
-
-    [
-      "Check your angle",
-      "Tilt your face slightly UP."
-    ],
-
-    [
-      "Check your angle",
-      "Now tilt your face slightly DOWN."
-    ],
-
-    [
-      "Hold still",
-      "Keep your face centered and stay still."
-    ],
-
-    [
-      "Scan ready",
-      "Perfect. Hold still while Luméra captures your scan."
-    ]
-
-  ];
-
-
-  for(
-    let i = 0;
-    i < steps.length;
-    i++
-  ){
-
-    status.textContent =
-      steps[i][0];
-
-    instruction.textContent =
-      steps[i][1];
-
-    progress.style.width =
-      (
-        (i + 1) /
-        steps.length *
-        100
-      ) + "%";
-
-
-    await new Promise(
-      resolve =>
-        setTimeout(
-          resolve,
-          1800
-        )
-    );
-
-  }
-
-
-  await completeScan();
-
-}
-
-
-async function completeScan(){
-
-  document
-    .getElementById("scanStatus")
-    .textContent =
-      "Analyzing your skin…";
-
-
-  document
-    .getElementById("scanInstruction")
-    .textContent =
-      "Luméra is preparing your personalized result.";
-
-
-  await new Promise(
-    resolve =>
-      setTimeout(
-        resolve,
-        1800
-      )
-  );
-
-
-  const newBalance =
-    Math.max(
+    ctx.drawImage(
+      video,
+      sx,
+      sy,
+      size,
+      size,
       0,
-      scanCredits - 1
+      0,
+      720,
+      720
     );
 
+    // Convert image to JPEG
+    const image = canvas.toDataURL("image/jpeg", 0.82);
 
-  const {
-    error
-  } =
-    await supabaseClient
-      .from("scan_usage")
-      .update({
-        free_scans_used:
-          newBalance
+    // Send image to our Vercel backend
+    const response = await fetch("/api/analyze", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        image: image
       })
-      .eq(
-        "user_id",
-        currentUser.id
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(
+        data.error || "Luméra could not analyze your scan."
       );
+    }
 
+    const analysis = data.analysis;
 
-  if(error){
+    // Make sure the score is valid
+    const score = Math.max(
+      0,
+      Math.min(10, Number(analysis.score) || 0)
+    );
+
+    // Display score
+    if (scoreNumber) {
+      scoreNumber.textContent = score + "/10";
+    }
+
+    // Display concerns
+    if (concerns) {
+      concerns.textContent =
+        Array.isArray(analysis.concerns) &&
+        analysis.concerns.length
+          ? analysis.concerns.join(" • ")
+          : "No major visible concerns detected.";
+    }
+
+    // Display what the skin needs
+    if (needs) {
+      needs.textContent =
+        Array.isArray(analysis.needs) &&
+        analysis.needs.length
+          ? analysis.needs.join(" • ")
+          : "Your skin may benefit from a simple, consistent routine.";
+    }
+
+    // Display routine + recommendations
+    if (routine) {
+      const morning =
+        Array.isArray(analysis.morningRoutine) &&
+        analysis.morningRoutine.length
+          ? analysis.morningRoutine.join(" → ")
+          : "Gentle cleanser → moisturizer → sunscreen";
+
+      const evening =
+        Array.isArray(analysis.eveningRoutine) &&
+        analysis.eveningRoutine.length
+          ? analysis.eveningRoutine.join(" → ")
+          : "Gentle cleanser → moisturizer";
+
+      const recommendations =
+        Array.isArray(analysis.recommendations) &&
+        analysis.recommendations.length
+          ? analysis.recommendations.join(" • ")
+          : "No specific products recommended yet.";
+
+      routine.textContent =
+        "MORNING:\n" +
+        morning +
+        "\n\nEVENING:\n" +
+        evening +
+        "\n\nPRODUCTS:\n" +
+        recommendations;
+    }
+
+    // Only use a scan AFTER successful analysis
+    scanCredits = Math.max(0, scanCredits - 1);
+
+    // Save remaining scan balance
+    if (currentUser) {
+      const { error } = await supabase
+        .from("scan_usage")
+        .update({
+          free_scans_used: scanCredits
+        })
+        .eq("user_id", currentUser.id);
+
+      if (error) {
+        console.error("Could not update scan balance:", error);
+      }
+    }
+
+    // Stop camera after successful scan
+    if (typeof stopCamera === "function") {
+      stopCamera();
+    }
+
+    // Show result section if your page has one
+    const scanner = document.getElementById("scanner");
+    const result = document.getElementById("result");
+
+    if (scanner) scanner.style.display = "none";
+    if (result) result.style.display = "block";
 
     alert(
-      "Your scan could not be recorded. Please try again."
+      "✨ Your Luméra skin analysis is ready!"
     );
 
-    console.error(error);
+  } catch (error) {
+    console.error("Luméra scan error:", error);
 
+    alert(
+      "Luméra could not complete the analysis.\n\n" +
+      "Please check your internet connection and try again."
+    );
+
+    const concerns = document.getElementById("concerns");
+    const needs = document.getElementById("needs");
+    const routine = document.getElementById("routine");
+
+    if (concerns) concerns.textContent = "Analysis failed.";
+    if (needs) needs.textContent = "Please try the scan again.";
+    if (routine) routine.textContent = "";
+
+  } finally {
     scanRunning = false;
-
-    return;
-
   }
-
-
-  scanCredits =
-    newBalance;
-
-
-  updateScanCounter();
-
-
-  document
-    .getElementById("scoreNumber")
-    .textContent =
-      "—";
-
-
-  document
-    .getElementById("concerns")
-    .textContent =
-      "The AI analysis backend will identify visible characteristics such as texture, hydration, tone and blemishes.";
-
-
-  document
-    .getElementById("needs")
-    .textContent =
-      "Your personalized skin needs will appear here once the AI analysis backend is connected.";
-
-
-  document
-    .getElementById("routine")
-    .textContent =
-      "Your personalized morning and evening routine will appear here once the AI analysis backend is connected.";
-
-
-  document
-    .getElementById("result")
-    .style
-    .display =
-      "block";
-
-
-  document
+}
+</script>
