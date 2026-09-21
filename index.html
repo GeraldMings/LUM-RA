@@ -1904,6 +1904,7 @@ function getUserEmail(){
 ========================================================= */
 
 async function buyPlan(plan) {
+
   const links = {
     scan: "https://paystack.com/buy/lumra-3-scan-pass-yeocej",
     standard: "https://paystack.com/buy/lumra-standard-umgyxu",
@@ -1917,29 +1918,62 @@ async function buyPlan(plan) {
     return;
   }
 
-  // User must create/log into a Luméra account first
-  if (!window.Clerk || !window.Clerk.user) {
-    window.Clerk.openSignUp();
-    return;
+  try {
+
+    // Wait for Clerk to fully load
+    const clerk = await waitForClerk();
+
+    currentUser = clerk.user;
+
+    updateAccountUI();
+
+    // No Luméra account yet
+    if (!currentUser) {
+
+      pendingPlan = plan;
+
+      clerk.openSignUp();
+
+      return;
+    }
+
+    // Get the account email
+    const email =
+      currentUser.primaryEmailAddress?.emailAddress ||
+      currentUser.emailAddresses?.[0]?.emailAddress ||
+      "";
+
+    if (!email) {
+
+      alert(
+        "Please add an email address to your Luméra account before purchasing."
+      );
+
+      return;
+    }
+
+    // Account exists → Paystack
+    const separator =
+      link.includes("?") ? "&" : "?";
+
+    window.location.href =
+      link +
+      separator +
+      "email=" +
+      encodeURIComponent(email);
+
+  } catch (error) {
+
+    console.error(
+      "Luméra payment/account error:",
+      error
+    );
+
+    alert(
+      "Luméra could not open your account system. Please refresh the page and try again."
+    );
+
   }
-
-  // Get the email attached to the Luméra account
-  const email =
-    window.Clerk.user.primaryEmailAddress?.emailAddress;
-
-  if (!email) {
-    alert("Please add an email address to your Luméra account.");
-    return;
-  }
-
-  // Account exists → continue to Paystack
-  const separator = link.includes("?") ? "&" : "?";
-
-  window.location.href =
-    link +
-    separator +
-    "email=" +
-    encodeURIComponent(email);
   }
 
 
