@@ -12,8 +12,7 @@ export default async function handler(req, res) {
     // 1. VERIFY PAYSTACK SIGNATURE
     // =====================================================
 
-    const signature =
-      req.headers["x-paystack-signature"];
+    const signature = req.headers["x-paystack-signature"];
 
     if (!signature) {
       return res.status(401).json({
@@ -40,7 +39,6 @@ export default async function handler(req, res) {
       });
     }
 
-
     // =====================================================
     // 2. READ PAYSTACK EVENT
     // =====================================================
@@ -56,9 +54,8 @@ export default async function handler(req, res) {
       });
     }
 
-
     // =====================================================
-    // 3. GET PAYMENT INFORMATION
+    // 3. PAYMENT INFORMATION
     // =====================================================
 
     const email =
@@ -66,16 +63,12 @@ export default async function handler(req, res) {
         ?.trim()
         ?.toLowerCase();
 
-    const amount =
-      Number(event.data?.amount || 0);
+    const amount = Number(event.data?.amount || 0);
 
     const currency =
-      String(event.data?.currency || "")
-        .toUpperCase();
+      String(event.data?.currency || "").toUpperCase();
 
-    const reference =
-      event.data?.reference || null;
-
+    const reference = event.data?.reference || null;
 
     if (!email) {
       return res.status(400).json({
@@ -83,477 +76,431 @@ export default async function handler(req, res) {
       });
     }
 
-
     if (!reference) {
       return res.status(400).json({
         error: "Payment reference missing"
       });
     }
 
-
     console.log(
       `Luméra payment received: ${email} | ${currency} | GH₵${amount / 100} | ${reference}`
     );
 
-
-    // =====================================================
-    // 4. ONLY ACCEPT GHS PAYMENTS
-    // =====================================================
-
     if (currency !== "GHS") {
-      console.log(
-        `Ignoring non-GHS payment: ${currency}`
-      );
-
       return res.status(200).json({
         received: true
       });
     }
 
-
     // =====================================================
-    // 5. CHECK WHETHER THIS PAYMENT WAS ALREADY PROCESSED
+    // 4. CHECK DUPLICATE PAYMENT
     // =====================================================
 
-    const existingPayment =
-      await fetch(
-        `${process.env.SUPABASE_URL}/rest/v1/lumera_payments?reference=eq.${encodeURIComponent(reference)}&select=reference`,
-        {
-          method: "GET",
-
-          headers: {
-            apikey:
-              process.env.SUPABASE_SECRET_KEY,
-
-            Authorization:
-              `Bearer ${process.env.SUPABASE_SECRET_KEY}`
-          }
+    const existingPaymentResponse = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/lumera_payments?reference=eq.${encodeURIComponent(reference)}&select=reference`,
+      {
+        headers: {
+          apikey: process.env.SUPABASE_SECRET_KEY,
+          Authorization:
+            `Bearer ${process.env.SUPABASE_SECRET_KEY}`
         }
-      );
+      }
+    );
 
-
-    if (!existingPayment.ok) {
-
-      const error =
-        await existingPayment.text();
-
+    if (!existingPaymentResponse.ok) {
       console.error(
         "Payment lookup error:",
-        error
+        await existingPaymentResponse.text()
       );
 
       return res.status(500).json({
         error: "Could not check payment"
       });
-
     }
 
+    const existingPayments =
+      await existingPaymentResponse.json();
 
-    const existing =
-      await existingPayment.json();
-
-
-    if (existing.length > 0) {
-
+    if (existingPayments.length > 0) {
       console.log(
-        `Payment ${reference} was already processed.`
+        `Payment ${reference} already recorded.`
       );
 
       return res.status(200).json({
         received: true,
         already_processed: true
       });
-
     }
 
-
     // =====================================================
-    // 6. RECORD THE PAYMENT
+    // 5. RECORD PAYMENT
     // =====================================================
 
-    const paymentInsert =
-      await fetch(
-        `${process.env.SUPABASE_URL}/rest/v1/lumera_payments`,
-        {
-          method: "POST",
+    const paymentInsert = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/lumera_payments`,
+      {
+        method: "POST",
 
-          headers: {
-            "Content-Type":
-              "application/json",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: process.env.SUPABASE_SECRET_KEY,
+          Authorization:
+            `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
+          Prefer: "return=minimal"
+        },
 
-            apikey:
-              process.env.SUPABASE_SECRET_KEY,
-
-            Authorization:
-              `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
-
-            Prefer:
-              "return=minimal"
-          },
-
-          body: JSON.stringify({
-            reference: reference,
-            email: email,
-            amount: amount,
-            currency: currency
-          })
-        }
-      );
-
+        body: JSON.stringify({
+          reference,
+          email,
+          amount,
+          currency
+        })
+      }
+    );
 
     if (!paymentInsert.ok) {
-
-      const error =
-        await paymentInsert.text();
-
       console.error(
         "Payment record error:",
-        error
+        await paymentInsert.text()
       );
 
       return res.status(500).json({
         error: "Could not record payment"
       });
-
     }
 
-
     // =====================================================
-    // 7. GH₵5 = 3 SCANS
+    // 6. GH₵5 = 3-SCAN PASS
     // =====================================================
 
     if (amount === 500) {
-
       console.log(
         `Granting 3 scans to ${email}`
       );
 
-
-      const existingAccountResponse =
-        await fetch(
-          `${process.env.SUPABASE_URL}/rest/v1/lumera_accounts?email=eq.${encodeURIComponent(email)}&select=email,scan_credits`,
-          {
-            method: "GET",
-
-            headers: {
-              apikey:
-                process.env.SUPABASE_SECRET_KEY,
-
-              Authorization:
-                `Bearer ${process.env.SUPABASE_SECRET_KEY}`
-            }
+      // Look for an existing entitlement for this email
+      const entitlementLookup = await fetch(
+        `${process.env.SUPABASE_URL}/rest/v1/lumera_entitlements?email=eq.${encodeURIComponent(email)}&select=id,email,plan,scan,scan_remaining,status,transaction_reference,expires_at`,
+        {
+          headers: {
+            apikey: process.env.SUPABASE_SECRET_KEY,
+            Authorization:
+              `Bearer ${process.env.SUPABASE_SECRET_KEY}`
           }
-        );
+        }
+      );
 
-
-      if (!existingAccountResponse.ok) {
-
-        const error =
-          await existingAccountResponse.text();
-
+      if (!entitlementLookup.ok) {
         console.error(
-          "Account lookup error:",
-          error
+          "Entitlement lookup error:",
+          await entitlementLookup.text()
         );
 
         return res.status(500).json({
-          error: "Could not find Luméra account"
+          error: "Could not check Luméra entitlement"
         });
-
       }
 
+      const entitlements =
+        await entitlementLookup.json();
 
-      const accounts =
-        await existingAccountResponse.json();
+      // ---------------------------------------------------
+      // Existing entitlement
+      // ---------------------------------------------------
 
+      if (entitlements.length > 0) {
+        const entitlement = entitlements[0];
 
-      if (accounts.length === 0) {
+        const currentRemaining =
+          Number(entitlement.scan_remaining || 0);
 
-        const createAccount =
-          await fetch(
-            `${process.env.SUPABASE_URL}/rest/v1/lumera_accounts`,
-            {
-              method: "POST",
+        const updateEntitlement = await fetch(
+          `${process.env.SUPABASE_URL}/rest/v1/lumera_entitlements?id=eq.${encodeURIComponent(entitlement.id)}`,
+          {
+            method: "PATCH",
 
-              headers: {
-                "Content-Type":
-                  "application/json",
+            headers: {
+              "Content-Type": "application/json",
+              apikey: process.env.SUPABASE_SECRET_KEY,
+              Authorization:
+                `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
+              Prefer: "return=minimal"
+            },
 
-                apikey:
-                  process.env.SUPABASE_SECRET_KEY,
+            body: JSON.stringify({
+              scan: 3,
+              scan_remaining: currentRemaining + 3,
+              status: "active",
+              transaction_reference: reference
+            })
+          }
+        );
 
-                Authorization:
-                  `Bearer ${process.env.SUPABASE_SECRET_KEY}`
-              },
-
-              body: JSON.stringify({
-                email: email,
-                scan_credits: 3,
-                plan: null,
-                plan_expires_at: null,
-                last_payment_reference:
-                  reference
-              })
-            }
-          );
-
-
-        if (!createAccount.ok) {
-
-          const error =
-            await createAccount.text();
-
+        if (!updateEntitlement.ok) {
           console.error(
-            "Account creation error:",
-            error
+            "Entitlement update error:",
+            await updateEntitlement.text()
           );
 
           return res.status(500).json({
-            error: "Could not create Luméra account"
+            error: "Could not update Luméra entitlement"
           });
-
         }
+      }
 
-      } else {
+      // ---------------------------------------------------
+      // New entitlement
+      // ---------------------------------------------------
 
-        const currentCredits =
-          Number(
-            accounts[0].scan_credits || 0
-          );
+      else {
+        const createEntitlement = await fetch(
+          `${process.env.SUPABASE_URL}/rest/v1/lumera_entitlements`,
+          {
+            method: "POST",
 
+            headers: {
+              "Content-Type": "application/json",
+              apikey: process.env.SUPABASE_SECRET_KEY,
+              Authorization:
+                `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
+              Prefer: "return=minimal"
+            },
 
-        const updateAccount =
-          await fetch(
-            `${process.env.SUPABASE_URL}/rest/v1/lumera_accounts?email=eq.${encodeURIComponent(email)}`,
-            {
-              method: "PATCH",
+            body: JSON.stringify({
+              user_id: null,
+              email,
+              plan: "3_scan_pass",
+              scan: 3,
+              scan_remaining: 3,
+              status: "active",
+              transaction_reference: reference,
+              expires_at: null
+            })
+          }
+        );
 
-              headers: {
-                "Content-Type":
-                  "application/json",
-
-                apikey:
-                  process.env.SUPABASE_SECRET_KEY,
-
-                Authorization:
-                  `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
-
-                Prefer:
-                  "return=minimal"
-              },
-
-              body: JSON.stringify({
-                scan_credits:
-                  currentCredits + 3,
-
-                last_payment_reference:
-                  reference,
-
-                updated_at:
-                  new Date().toISOString()
-              })
-            }
-          );
-
-
-        if (!updateAccount.ok) {
-
-          const error =
-            await updateAccount.text();
-
+        if (!createEntitlement.ok) {
           console.error(
-            "Scan credit update error:",
-            error
+            "Entitlement creation error:",
+            await createEntitlement.text()
           );
 
           return res.status(500).json({
-            error: "Could not grant scan credits"
+            error: "Could not create Luméra entitlement"
           });
-
         }
-
       }
-
 
       console.log(
         `Luméra: 3 scans successfully granted to ${email}`
       );
-
     }
 
-
     // =====================================================
-    // 8. GH₵100 = STANDARD
+    // 7. GH₵100 = STANDARD
     // =====================================================
 
     if (amount === 10000) {
-
-      const expiry =
-        new Date();
+      const expiry = new Date();
 
       expiry.setMonth(
         expiry.getMonth() + 1
       );
 
+      const entitlementLookup = await fetch(
+        `${process.env.SUPABASE_URL}/rest/v1/lumera_entitlements?email=eq.${encodeURIComponent(email)}&select=id`,
+        {
+          headers: {
+            apikey: process.env.SUPABASE_SECRET_KEY,
+            Authorization:
+              `Bearer ${process.env.SUPABASE_SECRET_KEY}`
+          }
+        }
+      );
 
-      const response =
-        await fetch(
-          `${process.env.SUPABASE_URL}/rest/v1/lumera_accounts?on_conflict=email`,
+      if (!entitlementLookup.ok) {
+        return res.status(500).json({
+          error: "Could not check Luméra entitlement"
+        });
+      }
+
+      const entitlements =
+        await entitlementLookup.json();
+
+      const entitlementData = {
+        email,
+        plan: "standard",
+        status: "active",
+        transaction_reference: reference,
+        expires_at: expiry.toISOString()
+      };
+
+      if (entitlements.length > 0) {
+        const update = await fetch(
+          `${process.env.SUPABASE_URL}/rest/v1/lumera_entitlements?id=eq.${encodeURIComponent(entitlements[0].id)}`,
+          {
+            method: "PATCH",
+
+            headers: {
+              "Content-Type": "application/json",
+              apikey: process.env.SUPABASE_SECRET_KEY,
+              Authorization:
+                `Bearer ${process.env.SUPABASE_SECRET_KEY}`
+            },
+
+            body: JSON.stringify(entitlementData)
+          }
+        );
+
+        if (!update.ok) {
+          console.error(
+            "Standard entitlement error:",
+            await update.text()
+          );
+
+          return res.status(500).json({
+            error: "Could not activate Standard"
+          });
+        }
+      } else {
+        const create = await fetch(
+          `${process.env.SUPABASE_URL}/rest/v1/lumera_entitlements`,
           {
             method: "POST",
 
             headers: {
-              "Content-Type":
-                "application/json",
-
-              apikey:
-                process.env.SUPABASE_SECRET_KEY,
-
+              "Content-Type": "application/json",
+              apikey: process.env.SUPABASE_SECRET_KEY,
               Authorization:
-                `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
-
-              Prefer:
-                "resolution=merge-duplicates,return=minimal"
+                `Bearer ${process.env.SUPABASE_SECRET_KEY}`
             },
 
-            body: JSON.stringify({
-              email: email,
-              plan: "standard",
-              plan_expires_at:
-                expiry.toISOString(),
-              last_payment_reference:
-                reference,
-              updated_at:
-                new Date().toISOString()
-            })
+            body: JSON.stringify(entitlementData)
           }
         );
 
+        if (!create.ok) {
+          console.error(
+            "Standard entitlement creation error:",
+            await create.text()
+          );
 
-      if (!response.ok) {
-
-        const error =
-          await response.text();
-
-        console.error(
-          "Standard plan error:",
-          error
-        );
-
-        return res.status(500).json({
-          error: "Could not activate Standard plan"
-        });
-
+          return res.status(500).json({
+            error: "Could not activate Standard"
+          });
+        }
       }
-
 
       console.log(
         `Luméra Standard activated for ${email}`
       );
-
     }
 
-
     // =====================================================
-    // 9. GH₵300 = PRO
+    // 8. GH₵300 = PRO
     // =====================================================
 
     if (amount === 30000) {
-
-      const expiry =
-        new Date();
+      const expiry = new Date();
 
       expiry.setFullYear(
         expiry.getFullYear() + 1
       );
 
+      const entitlementLookup = await fetch(
+        `${process.env.SUPABASE_URL}/rest/v1/lumera_entitlements?email=eq.${encodeURIComponent(email)}&select=id`,
+        {
+          headers: {
+            apikey: process.env.SUPABASE_SECRET_KEY,
+            Authorization:
+              `Bearer ${process.env.SUPABASE_SECRET_KEY}`
+          }
+        }
+      );
 
-      const response =
-        await fetch(
-          `${process.env.SUPABASE_URL}/rest/v1/lumera_accounts?on_conflict=email`,
+      if (!entitlementLookup.ok) {
+        return res.status(500).json({
+          error: "Could not check Luméra entitlement"
+        });
+      }
+
+      const entitlements =
+        await entitlementLookup.json();
+
+      const entitlementData = {
+        email,
+        plan: "pro",
+        status: "active",
+        transaction_reference: reference,
+        expires_at: expiry.toISOString()
+      };
+
+      if (entitlements.length > 0) {
+        const update = await fetch(
+          `${process.env.SUPABASE_URL}/rest/v1/lumera_entitlements?id=eq.${encodeURIComponent(entitlements[0].id)}`,
+          {
+            method: "PATCH",
+
+            headers: {
+              "Content-Type": "application/json",
+              apikey: process.env.SUPABASE_SECRET_KEY,
+              Authorization:
+                `Bearer ${process.env.SUPABASE_SECRET_KEY}`
+            },
+
+            body: JSON.stringify(entitlementData)
+          }
+        );
+
+        if (!update.ok) {
+          console.error(
+            "Pro entitlement error:",
+            await update.text()
+          );
+
+          return res.status(500).json({
+            error: "Could not activate Pro"
+          });
+        }
+      } else {
+        const create = await fetch(
+          `${process.env.SUPABASE_URL}/rest/v1/lumera_entitlements`,
           {
             method: "POST",
 
             headers: {
-              "Content-Type":
-                "application/json",
-
-              apikey:
-                process.env.SUPABASE_SECRET_KEY,
-
+              "Content-Type": "application/json",
+              apikey: process.env.SUPABASE_SECRET_KEY,
               Authorization:
-                `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
-
-              Prefer:
-                "resolution=merge-duplicates,return=minimal"
+                `Bearer ${process.env.SUPABASE_SECRET_KEY}`
             },
 
-            body: JSON.stringify({
-              email: email,
-              plan: "pro",
-              plan_expires_at:
-                expiry.toISOString(),
-              last_payment_reference:
-                reference,
-              updated_at:
-                new Date().toISOString()
-            })
+            body: JSON.stringify(entitlementData)
           }
         );
 
+        if (!create.ok) {
+          console.error(
+            "Pro entitlement creation error:",
+            await create.text()
+          );
 
-      if (!response.ok) {
-
-        const error =
-          await response.text();
-
-        console.error(
-          "Pro plan error:",
-          error
-        );
-
-        return res.status(500).json({
-          error: "Could not activate Pro plan"
-        });
-
+          return res.status(500).json({
+            error: "Could not activate Pro"
+          });
+        }
       }
-
 
       console.log(
         `Luméra Pro activated for ${email}`
       );
-
     }
-
-
-    // =====================================================
-    // 10. UNKNOWN AMOUNT
-    // =====================================================
-
-    if (
-      amount !== 500 &&
-      amount !== 10000 &&
-      amount !== 30000
-    ) {
-
-      console.log(
-        `Unknown Luméra payment amount: ${amount}`
-      );
-
-    }
-
-
-    // =====================================================
-    // 11. DONE
-    // =====================================================
 
     return res.status(200).json({
       received: true
     });
 
-
   } catch (error) {
-
     console.error(
       "Luméra webhook error:",
       error
@@ -562,6 +509,5 @@ export default async function handler(req, res) {
     return res.status(500).json({
       error: "Webhook processing failed"
     });
-
   }
-                }
+    }
