@@ -1917,27 +1917,29 @@ async function buyPlan(plan) {
     return;
   }
 
-  // If Clerk is available and the user is not signed in,
-  // open the Luméra account sign-up.
-  if (window.Clerk) {
-    if (!window.Clerk.user) {
-      window.Clerk.openSignUp();
-      return;
-    }
-
-    const email =
-      window.Clerk.user.primaryEmailAddress?.emailAddress;
-
-    if (email) {
-      const separator = link.includes("?") ? "&" : "?";
-      window.location.href =
-        link + separator + "email=" + encodeURIComponent(email);
-      return;
-    }
+  // User must create/log into a Luméra account first
+  if (!window.Clerk || !window.Clerk.user) {
+    window.Clerk.openSignUp();
+    return;
   }
 
-  // Fallback: still open Paystack.
-  window.location.href = link;
+  // Get the email attached to the Luméra account
+  const email =
+    window.Clerk.user.primaryEmailAddress?.emailAddress;
+
+  if (!email) {
+    alert("Please add an email address to your Luméra account.");
+    return;
+  }
+
+  // Account exists → continue to Paystack
+  const separator = link.includes("?") ? "&" : "?";
+
+  window.location.href =
+    link +
+    separator +
+    "email=" +
+    encodeURIComponent(email);
   }
 
 
