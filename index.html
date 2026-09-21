@@ -1429,7 +1429,12 @@ async function buyPlan(plan){
 
     }
 
-    await window.Clerk.load();
+    await window.Clerk.load({
+  ui:{
+    ClerkUI:
+      window.__internal_ClerkUICtor
+  }
+});
 
 
     currentUser =
@@ -2232,31 +2237,23 @@ async function initClerk(){
 
     if(!window.Clerk){
 
-      console.error(
-        "ClerkJS did not load."
-      );
-
+      console.error("ClerkJS did not load.");
       return;
 
     }
 
-
     await window.Clerk.load({
-      appearance:
-        clerkAppearance()
+
+      ui:{
+        ClerkUI:
+          window.__internal_ClerkUICtor
+      }
+
     });
 
+    console.log("Luméra: Clerk loaded successfully.");
 
     await refreshClerkUser();
-
-
-    /*
-      IMPORTANT:
-
-      This watches for the moment
-      the user finishes signing up
-      or signing in.
-    */
 
     window.Clerk.addListener(
       async ({user}) => {
@@ -2264,16 +2261,7 @@ async function initClerk(){
         currentUser =
           user || null;
 
-
         await refreshClerkUser();
-
-
-        /*
-          If the visitor clicked
-          a plan before creating
-          their account, continue
-          to that exact plan.
-        */
 
         if(
           currentUser &&
@@ -2283,27 +2271,36 @@ async function initClerk(){
           const selectedPlan =
             pendingLumeraPlan;
 
+          pendingLumeraPlan = null;
 
-          pendingLumeraPlan =
-            null;
+          const email =
+            currentUser
+              .primaryEmailAddress
+              ?.emailAddress ||
+            currentUser
+              .emailAddresses?.[0]
+              ?.emailAddress ||
+            "";
 
+          if(!email){
 
-          setTimeout(
-            () => {
+            alert(
+              "Please add an email address to your Luméra account."
+            );
 
-              buyPlan(
-                selectedPlan
-              );
+            return;
 
-            },
-            500
-          );
+          }
+
+          window.location.href =
+            PAYSTACK_LINKS[selectedPlan] +
+            "?email=" +
+            encodeURIComponent(email);
 
         }
 
       }
     );
-
 
   }catch(error){
 
@@ -2314,7 +2311,7 @@ async function initClerk(){
 
   }
 
-}
+  }
 
 
 /* =========================
