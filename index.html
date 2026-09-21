@@ -1,449 +1,1374 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Luméra — Skincare Intelligence</title>
-<meta name="description" content="Luméra helps you understand your skin through intelligent facial analysis and personalized skincare recommendations."><script
+<meta name="description" content="Luméra helps you understand your skin through intelligent facial analysis and personalized skincare recommendations.">
+
+<script
   defer
   crossorigin="anonymous"
   src="https://subtle-ewe-6462.clerk.accounts.dev/npm/@clerk/ui@1/dist/ui.browser.js"
-  type="text/javascript"></script><script
+  type="text/javascript"></script>
+
+<script
   defer
   crossorigin="anonymous"
   data-clerk-publishable-key="pk_test_c3VidGxlLWV3ZS02NDYyLmNsZXJrLmFjY291bnRzLmRldiQ"
   src="https://subtle-ewe-6462.clerk.accounts.dev/npm/@clerk/clerk-js@6/dist/clerk.browser.js"
-  type="text/javascript"></script><style>
+  type="text/javascript"></script>
+
+<style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap');
 
-:root{--black:#050308;--card:#11091b;--purple:#8d4dff;--purple2:#b978ff;--lav:#d7b7ff;--white:#faf8ff;--muted:#b7adbf;--border:rgba(178,111,255,.27)}
-*{box-sizing:border-box;margin:0;padding:0} html{scroll-behavior:smooth}
-body{background:radial-gradient(circle at 50% -10%,rgba(125,45,255,.25),transparent 35%),var(--black);color:var(--white);font-family:"DM Sans",sans-serif}
-a{text-decoration:none;color:inherit} button{font:inherit}
-nav{position:fixed;z-index:1000;top:0;left:0;width:100%;padding:17px 6%;display:flex;justify-content:space-between;align-items:center;background:rgba(5,3,8,.82);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.06)}
-.logo,.footer-logo{font:600 28px "Playfair Display",serif;letter-spacing:1px}.logo span,.footer-logo span,h1 span,.section-title span,.final-cta h2 span{color:var(--purple2);font-style:italic}
-.nav-links{display:flex;gap:25px;align-items:center}.nav-links a{color:#c8bdcf;font-size:14px}.nav-links a:hover{color:var(--purple2)}
-.nav-account{border:1px solid var(--border);padding:9px 15px;border-radius:25px;background:rgba(140,70,255,.13);cursor:pointer;color:white}
-.hero{min-height:100vh;padding:145px 7% 80px;display:grid;grid-template-columns:1fr 1fr;gap:55px;align-items:center}
-.eyebrow{color:var(--lav);letter-spacing:4px;font-size:11px;text-transform:uppercase;margin-bottom:18px}
-h1{font:600 clamp(55px,8vw,95px)/.98 "Playfair Display",serif;letter-spacing:-3px}.hero-text{max-width:600px;color:#c3b9ca;font-size:18px;line-height:1.8;margin:27px 0}
-.hero-buttons{display:flex;gap:12px;flex-wrap:wrap}.primary,.secondary{display:inline-flex;align-items:center;justify-content:center;padding:15px 25px;border-radius:40px;cursor:pointer}
-.primary{border:0;color:#fff;font-weight:700;background:linear-gradient(135deg,#7630f4,#b76dff);box-shadow:0 0 40px rgba(137,58,255,.3)}.secondary{border:1px solid var(--border);background:rgba(255,255,255,.035)}
-.hero-image img,.journey-image img{width:100%;border-radius:30px;border:1px solid var(--border)}
-section{padding:95px 7%}.section-heading{max-width:750px;text-align:center;margin:0 auto 50px}.section-title{font:600 clamp(40px,5vw,65px)/1.05 "Playfair Display",serif;margin-bottom:15px}.section-heading p{color:var(--muted);line-height:1.8}
-.access-grid,.products-grid,.care-grid{max-width:1150px;margin:auto;display:grid;gap:20px}.access-grid{grid-template-columns:repeat(3,1fr)}
-.access-card,.product,.care-card{padding:30px;border-radius:27px;border:1px solid var(--border);background:linear-gradient(145deg,rgba(31,14,48,.9),rgba(9,4,14,.95))}
-.access-card{display:flex;flex-direction:column}.access-icon,.product-symbol{font-size:32px;color:var(--purple2);margin-bottom:15px}
-.access-card h3,.product h3,.care-card h3{font-family:"Playfair Display",serif}.access-card h3{font-size:29px}.price{font-size:27px;font-weight:700;margin:17px 0}.price small{font-size:13px;color:var(--muted);font-weight:400}
-.access-card ul,.care-card ul{list-style:none;margin:15px 0 20px}.access-card li,.care-card li{color:#c8bdcf;margin:12px 0;font-size:14px;line-height:1.6}.access-card li:before,.care-card li:before{content:"✦";color:var(--purple2);margin-right:8px}
-.plan-button{width:100%;margin-top:auto}.locked-note{text-align:center;color:#93889d;font-size:12px;margin-top:12px}
-.products-grid{grid-template-columns:repeat(4,1fr)}.product{min-height:210px}.product h3{font-size:24px;margin-bottom:8px}.product p,.care-card li{color:var(--muted);line-height:1.65;font-size:13px}.product-tag{display:inline-block;margin-top:13px;padding:6px 10px;border-radius:15px;background:rgba(139,77,255,.13);color:var(--lav);font-size:10px}
-.care-grid{grid-template-columns:1fr 1fr;max-width:1000px}.care-card h3{color:var(--purple2);font-size:27px;margin-bottom:15px}
-.final-cta{text-align:center;background:radial-gradient(circle,rgba(129,48,255,.18),transparent 55%)}.final-cta h2{font:600 clamp(43px,6vw,75px) "Playfair Display",serif}.final-cta p{max-width:600px;margin:20px auto 30px;color:var(--muted);line-height:1.8}
-footer{padding:45px 7%;border-top:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;gap:30px}footer p{color:#83788c;font-size:13px;line-height:1.7;max-width:500px}
+:root{
+  --black:#050308;
+  --card:#11091b;
+  --purple:#8d4dff;
+  --purple2:#b978ff;
+  --lav:#d7b7ff;
+  --white:#faf8ff;
+  --muted:#b7adbf;
+  --border:rgba(178,111,255,.27)
+}
 
-.scanner-section{display:none}.scanner{max-width:1050px;margin:auto;padding:35px;border-radius:32px;border:1px solid var(--border);background:rgba(13,6,21,.95)}
-.scanner-header{text-align:center;margin-bottom:28px}.scanner-header h2{font:600 45px "Playfair Display",serif}.scanner-header h2 span{color:var(--purple2)}
-.selected-plan{display:inline-block;margin-top:10px;padding:7px 13px;border-radius:20px;background:rgba(139,77,255,.14);color:var(--lav);font-size:12px}
-.scan-counter{text-align:center;color:var(--lav);margin-bottom:15px;font-size:14px}
-.camera-frame{position:relative;width:100%;max-width:520px;aspect-ratio:1;margin:auto;overflow:hidden;border-radius:28px;background:#020103;border:1px solid rgba(192,130,255,.55)}
-video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}.face-guide{position:absolute;width:60%;height:76%;left:20%;top:12%;border:2px solid rgba(214,178,255,.85);border-radius:50%;pointer-events:none}.scan-line{position:absolute;width:65%;left:17.5%;height:2px;background:var(--purple2);box-shadow:0 0 20px var(--purple2);animation:scanline 2.2s infinite}@keyframes scanline{0%,100%{top:22%}50%{top:78%}}
-.scan-guidance{text-align:center;margin-top:22px}.scan-status{font:30px "Playfair Display",serif;color:var(--purple2)}.scan-instruction{color:#ded4e5;margin:7px 0;min-height:24px}.scan-progress{height:6px;max-width:500px;margin:18px auto;background:#24152f;border-radius:10px;overflow:hidden}.scan-progress-bar{height:100%;width:0;background:linear-gradient(90deg,#7730ed,#c17aff);transition:.4s}.scan-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}.stop{border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.04);color:white;padding:12px 19px;border-radius:30px;cursor:pointer}
-.result{display:none;max-width:900px;margin:40px auto 0;padding:30px;border-radius:28px;border:1px solid var(--border);background:rgba(255,255,255,.025)}.result-title{text-align:center;font:36px "Playfair Display",serif;margin-bottom:20px}.score-wrap{display:flex;justify-content:center}.score{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,#09050e 57%,transparent 58%),conic-gradient(#b66eff 80%,#281532 0)}.score strong{font:55px "Playfair Display",serif}.score small{color:var(--muted)}.result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:25px}.result-box{padding:20px;border-radius:20px;border:1px solid rgba(176,110,255,.2);background:rgba(23,10,34,.7)}.result-box h4{color:var(--purple2);margin-bottom:9px}.result-box p{color:var(--muted);line-height:1.6;font-size:14px;white-space:pre-line}
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0
+}
 
-.account-bar{display:none;position:fixed;z-index:1100;top:73px;right:6%;padding:10px 14px;border:1px solid var(--border);border-radius:20px;background:#100819;font-size:12px}.account-bar button{margin-left:10px;background:none;border:0;color:var(--purple2);cursor:pointer}
+html{
+  scroll-behavior:smooth
+}
 
-@media(max-width:900px){.hero{grid-template-columns:1fr}.access-grid,.products-grid{grid-template-columns:1fr 1fr}.result-grid{grid-template-columns:1fr}.nav-links{display:none}}
-@media(max-width:600px){section{padding:70px 5%}.hero{padding:125px 5% 70px}h1{font-size:55px}.hero-buttons{flex-direction:column}.primary,.secondary{width:100%}.access-grid,.products-grid,.care-grid{grid-template-columns:1fr}.scanner{padding:20px}footer{flex-direction:column}}
-</style></head><body><nav>
+body{
+  background:
+    radial-gradient(circle at 50% -10%,rgba(125,45,255,.25),transparent 35%),
+    var(--black);
+  color:var(--white);
+  font-family:"DM Sans",sans-serif
+}
+
+a{
+  text-decoration:none;
+  color:inherit
+}
+
+button{
+  font:inherit
+}
+
+nav{
+  position:fixed;
+  z-index:1000;
+  top:0;
+  left:0;
+  width:100%;
+  padding:17px 6%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:rgba(5,3,8,.82);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,.06)
+}
+
+.logo,.footer-logo{
+  font:600 28px "Playfair Display",serif;
+  letter-spacing:1px
+}
+
+.logo span,
+.footer-logo span,
+h1 span,
+.section-title span,
+.final-cta h2 span{
+  color:var(--purple2);
+  font-style:italic
+}
+
+.nav-links{
+  display:flex;
+  gap:25px;
+  align-items:center
+}
+
+.nav-links a{
+  color:#c8bdcf;
+  font-size:14px
+}
+
+.nav-links a:hover{
+  color:var(--purple2)
+}
+
+.nav-account{
+  border:1px solid var(--border);
+  padding:9px 15px;
+  border-radius:25px;
+  background:rgba(140,70,255,.13);
+  cursor:pointer;
+  color:white
+}
+
+.hero{
+  min-height:100vh;
+  padding:145px 7% 80px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:55px;
+  align-items:center
+}
+
+.eyebrow{
+  color:var(--lav);
+  letter-spacing:4px;
+  font-size:11px;
+  text-transform:uppercase;
+  margin-bottom:18px
+}
+
+h1{
+  font:600 clamp(55px,8vw,95px)/.98 "Playfair Display",serif;
+  letter-spacing:-3px
+}
+
+.hero-text{
+  max-width:600px;
+  color:#c3b9ca;
+  font-size:18px;
+  line-height:1.8;
+  margin:27px 0
+}
+
+.hero-buttons{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap
+}
+
+.primary,.secondary{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:15px 25px;
+  border-radius:40px;
+  cursor:pointer
+}
+
+.primary{
+  border:0;
+  color:#fff;
+  font-weight:700;
+  background:linear-gradient(135deg,#7630f4,#b76dff);
+  box-shadow:0 0 40px rgba(137,58,255,.3)
+}
+
+.secondary{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.035)
+}
+
+.hero-image img,
+.journey-image img{
+  width:100%;
+  border-radius:30px;
+  border:1px solid var(--border)
+}
+
+section{
+  padding:95px 7%
+}
+
+.section-heading{
+  max-width:750px;
+  text-align:center;
+  margin:0 auto 50px
+}
+
+.section-title{
+  font:600 clamp(40px,5vw,65px)/1.05 "Playfair Display",serif;
+  margin-bottom:15px
+}
+
+.section-heading p{
+  color:var(--muted);
+  line-height:1.8
+}
+
+.access-grid,
+.products-grid,
+.care-grid{
+  max-width:1150px;
+  margin:auto;
+  display:grid;
+  gap:20px
+}
+
+.access-grid{
+  grid-template-columns:repeat(3,1fr)
+}
+
+.access-card,
+.product,
+.care-card{
+  padding:30px;
+  border-radius:27px;
+  border:1px solid var(--border);
+  background:linear-gradient(
+    145deg,
+    rgba(31,14,48,.9),
+    rgba(9,4,14,.95)
+  )
+}
+
+.access-card{
+  display:flex;
+  flex-direction:column
+}
+
+.access-icon,
+.product-symbol{
+  font-size:32px;
+  color:var(--purple2);
+  margin-bottom:15px
+}
+
+.access-card h3,
+.product h3,
+.care-card h3{
+  font-family:"Playfair Display",serif
+}
+
+.access-card h3{
+  font-size:29px
+}
+
+.price{
+  font-size:27px;
+  font-weight:700;
+  margin:17px 0
+}
+
+.price small{
+  font-size:13px;
+  color:var(--muted);
+  font-weight:400
+}
+
+.access-card ul,
+.care-card ul{
+  list-style:none;
+  margin:15px 0 20px
+}
+
+.access-card li,
+.care-card li{
+  color:#c8bdcf;
+  margin:12px 0;
+  font-size:14px;
+  line-height:1.6
+}
+
+.access-card li:before,
+.care-card li:before{
+  content:"✦";
+  color:var(--purple2);
+  margin-right:8px
+}
+
+.plan-button{
+  width:100%;
+  margin-top:auto
+}
+
+.locked-note{
+  text-align:center;
+  color:#93889d;
+  font-size:12px;
+  margin-top:12px
+}
+
+.products-grid{
+  grid-template-columns:repeat(4,1fr)
+}
+
+.product{
+  min-height:210px
+}
+
+.product h3{
+  font-size:24px;
+  margin-bottom:8px
+}
+
+.product p,
+.care-card li{
+  color:var(--muted);
+  line-height:1.65;
+  font-size:13px
+}
+
+.product-tag{
+  display:inline-block;
+  margin-top:13px;
+  padding:6px 10px;
+  border-radius:15px;
+  background:rgba(139,77,255,.13);
+  color:var(--lav);
+  font-size:10px
+}
+
+.care-grid{
+  grid-template-columns:1fr 1fr;
+  max-width:1000px
+}
+
+.care-card h3{
+  color:var(--purple2);
+  font-size:27px;
+  margin-bottom:15px
+}
+
+.final-cta{
+  text-align:center;
+  background:radial-gradient(
+    circle,
+    rgba(129,48,255,.18),
+    transparent 55%
+  )
+}
+
+.final-cta h2{
+  font:600 clamp(43px,6vw,75px) "Playfair Display",serif
+}
+
+.final-cta p{
+  max-width:600px;
+  margin:20px auto 30px;
+  color:var(--muted);
+  line-height:1.8
+}
+
+footer{
+  padding:45px 7%;
+  border-top:1px solid rgba(255,255,255,.07);
+  display:flex;
+  justify-content:space-between;
+  gap:30px
+}
+
+footer p{
+  color:#83788c;
+  font-size:13px;
+  line-height:1.7;
+  max-width:500px
+}
+
+.scanner-section{
+  display:none
+}
+
+.scanner{
+  max-width:1050px;
+  margin:auto;
+  padding:35px;
+  border-radius:32px;
+  border:1px solid var(--border);
+  background:rgba(13,6,21,.95)
+}
+
+.scanner-header{
+  text-align:center;
+  margin-bottom:28px
+}
+
+.scanner-header h2{
+  font:600 45px "Playfair Display",serif
+}
+
+.scanner-header h2 span{
+  color:var(--purple2)
+}
+
+.selected-plan{
+  display:inline-block;
+  margin-top:10px;
+  padding:7px 13px;
+  border-radius:20px;
+  background:rgba(139,77,255,.14);
+  color:var(--lav);
+  font-size:12px
+}
+
+.scan-counter{
+  text-align:center;
+  color:var(--lav);
+  margin-bottom:15px;
+  font-size:14px
+}
+
+.camera-frame{
+  position:relative;
+  width:100%;
+  max-width:520px;
+  aspect-ratio:1;
+  margin:auto;
+  overflow:hidden;
+  border-radius:28px;
+  background:#020103;
+  border:1px solid rgba(192,130,255,.55)
+}
+
+video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transform:scaleX(-1)
+}
+
+.face-guide{
+  position:absolute;
+  width:60%;
+  height:76%;
+  left:20%;
+  top:12%;
+  border:2px solid rgba(214,178,255,.85);
+  border-radius:50%;
+  pointer-events:none
+}
+
+.scan-line{
+  position:absolute;
+  width:65%;
+  left:17.5%;
+  height:2px;
+  background:var(--purple2);
+  box-shadow:0 0 20px var(--purple2);
+  animation:scanline 2.2s infinite
+}
+
+@keyframes scanline{
+  0%,100%{top:22%}
+  50%{top:78%}
+}
+
+.scan-guidance{
+  text-align:center;
+  margin-top:22px
+}
+
+.scan-status{
+  font:30px "Playfair Display",serif;
+  color:var(--purple2)
+}
+
+.scan-instruction{
+  color:#ded4e5;
+  margin:7px 0;
+  min-height:24px
+}
+
+.scan-progress{
+  height:6px;
+  max-width:500px;
+  margin:18px auto;
+  background:#24152f;
+  border-radius:10px;
+  overflow:hidden
+}
+
+.scan-progress-bar{
+  height:100%;
+  width:0;
+  background:linear-gradient(90deg,#7730ed,#c17aff);
+  transition:.4s
+}
+
+.scan-actions{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap
+}
+
+.stop{
+  border:1px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.04);
+  color:white;
+  padding:12px 19px;
+  border-radius:30px;
+  cursor:pointer
+}
+
+.result{
+  display:none;
+  max-width:900px;
+  margin:40px auto 0;
+  padding:30px;
+  border-radius:28px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.025)
+}
+
+.result-title{
+  text-align:center;
+  font:36px "Playfair Display",serif;
+  margin-bottom:20px
+}
+
+.score-wrap{
+  display:flex;
+  justify-content:center
+}
+
+.score{
+  width:150px;
+  height:150px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:
+    radial-gradient(circle,#09050e 57%,transparent 58%),
+    conic-gradient(#b66eff 80%,#281532 0)
+}
+
+.score strong{
+  font:55px "Playfair Display",serif
+}
+
+.score small{
+  color:var(--muted)
+}
+
+.result-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
+  margin-top:25px
+}
+
+.result-box{
+  padding:20px;
+  border-radius:20px;
+  border:1px solid rgba(176,110,255,.2);
+  background:rgba(23,10,34,.7)
+}
+
+.result-box h4{
+  color:var(--purple2);
+  margin-bottom:9px
+}
+
+.result-box p{
+  color:var(--muted);
+  line-height:1.6;
+  font-size:14px;
+  white-space:pre-line
+}
+
+.account-bar{
+  display:none;
+  position:fixed;
+  z-index:1100;
+  top:73px;
+  right:6%;
+  padding:10px 14px;
+  border:1px solid var(--border);
+  border-radius:20px;
+  background:#100819;
+  font-size:12px
+}
+
+.account-bar button{
+  margin-left:10px;
+  background:none;
+  border:0;
+  color:var(--purple2);
+  cursor:pointer
+}
+
+@media(max-width:900px){
+
+  .hero{
+    grid-template-columns:1fr
+  }
+
+  .access-grid,
+  .products-grid{
+    grid-template-columns:1fr 1fr
+  }
+
+  .result-grid{
+    grid-template-columns:1fr
+  }
+
+  .nav-links{
+    display:none
+  }
+}
+
+@media(max-width:600px){
+
+  section{
+    padding:70px 5%
+  }
+
+  .hero{
+    padding:125px 5% 70px
+  }
+
+  h1{
+    font-size:55px
+  }
+
+  .hero-buttons{
+    flex-direction:column
+  }
+
+  .primary,
+  .secondary{
+    width:100%
+  }
+
+  .access-grid,
+  .products-grid,
+  .care-grid{
+    grid-template-columns:1fr
+  }
+
+  .scanner{
+    padding:20px
+  }
+
+  footer{
+    flex-direction:column
+  }
+}
+</style>
+</head>
+
+<body>
+
+<nav>
   <a href="#" class="logo">Lum<span>é</span>ra</a>
+
   <div class="nav-links">
     <a href="#about">About</a>
     <a href="#products">Products</a>
     <a href="#access">Access</a>
-    <button class="nav-account" id="accountButton" onclick="openAuth()">Sign in</button>
+    <button
+      class="nav-account"
+      id="accountButton"
+      onclick="openAuth()">
+      Sign in
+    </button>
   </div>
-</nav><div id="accountBar" class="account-bar">
+</nav>
+
+<div id="accountBar" class="account-bar">
   <span id="accountEmail"></span>
   <button onclick="signOut()">Sign out</button>
-</div><header class="hero">
+</div>
+
+<header class="hero">
+
   <div>
-    <div class="eyebrow">SKINCARE INTELLIGENCE</div>
-    <h1>Your Skin.<br><span>Understood.</span></h1>
-    <p class="hero-text">Meet Luméra — an intelligent skincare experience designed to help you understand your skin, discover what it may need and build a personalized skincare journey.</p>
-    <div class="hero-buttons">
-      <a href="#access" class="primary">✦ Start My Skin Journey</a>
-      <a href="#about" class="secondary">Discover Luméra</a>
+
+    <div class="eyebrow">
+      SKINCARE INTELLIGENCE
     </div>
+
+    <h1>
+      Your Skin.<br>
+      <span>Understood.</span>
+    </h1>
+
+    <p class="hero-text">
+      Meet Luméra — an intelligent skincare experience designed to help you
+      understand your skin, discover what it may need and build a
+      personalized skincare journey.
+    </p>
+
+    <div class="hero-buttons">
+
+      <a
+        href="#access"
+        class="primary">
+        ✦ Start My Skin Journey
+      </a>
+
+      <a
+        href="#about"
+        class="secondary">
+        Discover Luméra
+      </a>
+
+    </div>
+
   </div>
+
   <div class="hero-image">
-    <img src="lumera-beauty.png" alt="Luméra skincare">
+    <img
+      src="lumera-beauty.png"
+      alt="Luméra skincare">
   </div>
-</header><section id="about">
+
+</header>
+
+<section id="about">
+
   <div class="section-heading">
-    <div class="eyebrow">THE LUMÉRA EXPERIENCE</div>
-    <h2 class="section-title">Beauty meets <span>intelligence.</span></h2>
-    <p>Luméra is designed to make personalized skincare easier to understand — from your first scan to your long-term skin journey.</p>
-  </div>  <div class="access-grid">
+
+    <div class="eyebrow">
+      THE LUMÉRA EXPERIENCE
+    </div>
+
+    <h2 class="section-title">
+      Beauty meets <span>intelligence.</span>
+    </h2>
+
+    <p>
+      Luméra is designed to make personalized skincare easier to understand —
+      from your first scan to your long-term skin journey.
+    </p>
+
+  </div>
+
+  <div class="access-grid">
+
     <div class="access-card">
       <div class="access-icon">01</div>
       <h3>Scan</h3>
-      <p>Use your phone camera and follow Luméra's positioning guidance.</p>
-    </div><div class="access-card">
-  <div class="access-icon">02</div>
-  <h3>Understand</h3>
-  <p>Receive an AI-powered view of visible skin characteristics and concerns.</p>
-</div>
+      <p>
+        Use your phone camera and follow Luméra's positioning guidance.
+      </p>
+    </div>
 
-<div class="access-card">
-  <div class="access-icon">03</div>
-  <h3>Personalize</h3>
-  <p>Get skincare guidance, product recommendations and a routine built around your results.</p>
-</div>
+    <div class="access-card">
+      <div class="access-icon">02</div>
+      <h3>Understand</h3>
+      <p>
+        Receive an AI-powered view of visible skin characteristics and concerns.
+      </p>
+    </div>
+
+    <div class="access-card">
+      <div class="access-icon">03</div>
+      <h3>Personalize</h3>
+      <p>
+        Get skincare guidance, product recommendations and a routine built
+        around your results.
+      </p>
+    </div>
 
   </div>
-</section><section id="access">
+
+</section>
+
+<section id="access">
+
   <div class="section-heading">
-    <div class="eyebrow">CHOOSE YOUR EXPERIENCE</div>
-    <h2 class="section-title">Begin your <span>skin journey.</span></h2>
-    <p>Create or sign into your Luméra account first. Your payment and scan credits are connected to that account.</p>
-  </div>  <div class="access-grid"><div class="access-card">
-  <div class="access-icon">✦</div>
-  <h3>3-Scan Pass</h3>
-  <div class="price">GH₵5 <small>one-time</small></div>
 
-  <ul>
-    <li>3 skin-analysis scans</li>
-    <li>Skin score</li>
-    <li>Visible skin concerns</li>
-    <li>What your skin may need</li>
-    <li>Personalized guidance</li>
-  </ul>
+    <div class="eyebrow">
+      CHOOSE YOUR EXPERIENCE
+    </div>
 
-  <button class="primary plan-button" onclick="buyPlan('scan')">
-    Pay GH₵5 — Get 3 Scans
-  </button>
+    <h2 class="section-title">
+      Begin your <span>skin journey.</span>
+    </h2>
 
-  <div class="locked-note">
-    Your account email will be attached to the Paystack payment.
-  </div>
-</div>
-
-<div class="access-card">
-  <div class="access-icon">◇</div>
-  <h3>Standard</h3>
-  <div class="price">GH₵100 <small>monthly</small></div>
-
-  <ul>
-    <li>Regular skin analysis</li>
-    <li>Personalized recommendations</li>
-    <li>Skincare routine guidance</li>
-    <li>Skin journey tracking</li>
-    <li>Progress check-ins</li>
-  </ul>
-
-  <button class="primary plan-button" onclick="buyPlan('standard')">
-    Choose Standard
-  </button>
-</div>
-
-<div class="access-card">
-  <div class="access-icon">♕</div>
-  <h3>Pro</h3>
-  <div class="price">GH₵300 <small>yearly</small></div>
-
-  <ul>
-    <li>Advanced skin analysis</li>
-    <li>Personalized recommendations</li>
-    <li>Progress comparisons</li>
-    <li>Long-term skin tracking</li>
-    <li>Premium Luméra features</li>
-  </ul>
-
-  <button class="primary plan-button" onclick="buyPlan('pro')">
-    Choose Pro
-  </button>
-</div>
+    <p>
+      Create or sign into your Luméra account first.
+      Your payment and scan credits are connected to that account.
+    </p>
 
   </div>
-</section><section id="scanner" class="scanner-section">  <div class="scanner"><div id="scanCounter" class="scan-counter">
-  Your Luméra scan is ready.
-</div>
 
-<div class="scanner-header">
-  <div class="eyebrow">LUMÉRA LIVE SCAN</div>
-  <h2>Position your face <span>perfectly.</span></h2>
-  <div id="selectedPlan" class="selected-plan">
-    Luméra Skin Analysis
-  </div>
-</div>
+  <div class="access-grid">
 
-<div class="camera-frame">
-  <video id="camera" autoplay playsinline></video>
-  <div class="face-guide"></div>
-  <div class="scan-line"></div>
-</div>
+    <div class="access-card">
 
-<div class="scan-guidance">
+      <div class="access-icon">✦</div>
 
-  <div id="scanStatus" class="scan-status">
-    Camera ready
-  </div>
+      <h3>3-Scan Pass</h3>
 
-  <div id="scanInstruction" class="scan-instruction">
-    Position your face inside the oval.
-  </div>
-
-  <div class="scan-progress">
-    <div id="scanProgress" class="scan-progress-bar"></div>
-  </div>
-
-  <div class="scan-actions">
-    <button id="beginAnalysis" class="primary" onclick="beginGuidedScan()">
-      Begin Scan
-    </button>
-
-    <button class="stop" onclick="stopCamera()">
-      Close Camera
-    </button>
-  </div>
-
-  <div id="cameraError" style="color:#d9b8ff;margin-top:15px;font-size:13px"></div>
-
-</div>
-
-<div id="result" class="result">
-
-  <div class="result-title">
-    Your Luméra Skin Snapshot
-  </div>
-
-  <div class="score-wrap">
-    <div class="score">
-      <div>
-        <strong id="scoreNumber">—</strong>
-        <small>/10</small>
+      <div class="price">
+        GH₵5 <small>one-time</small>
       </div>
+
+      <ul>
+        <li>3 skin-analysis scans</li>
+        <li>Skin score</li>
+        <li>Visible skin concerns</li>
+        <li>What your skin may need</li>
+        <li>Personalized guidance</li>
+      </ul>
+
+      <button
+        class="primary plan-button"
+        onclick="buyPlan('scan')">
+        Pay GH₵5 — Get 3 Scans
+      </button>
+
+      <div class="locked-note">
+        Your account must use the same email at Paystack.
+      </div>
+
     </div>
+
+    <div class="access-card">
+
+      <div class="access-icon">◇</div>
+
+      <h3>Standard</h3>
+
+      <div class="price">
+        GH₵100 <small>monthly</small>
+      </div>
+
+      <ul>
+        <li>Regular skin analysis</li>
+        <li>Personalized recommendations</li>
+        <li>Skincare routine guidance</li>
+        <li>Skin journey tracking</li>
+        <li>Progress check-ins</li>
+      </ul>
+
+      <button
+        class="primary plan-button"
+        onclick="buyPlan('standard')">
+        Choose Standard
+      </button>
+
+    </div>
+
+    <div class="access-card">
+
+      <div class="access-icon">♕</div>
+
+      <h3>Pro</h3>
+
+      <div class="price">
+        GH₵300 <small>yearly</small>
+      </div>
+
+      <ul>
+        <li>Advanced skin analysis</li>
+        <li>Personalized recommendations</li>
+        <li>Progress comparisons</li>
+        <li>Long-term skin tracking</li>
+        <li>Premium Luméra features</li>
+      </ul>
+
+      <button
+        class="primary plan-button"
+        onclick="buyPlan('pro')">
+        Choose Pro
+      </button>
+
+    </div>
+
   </div>
 
-  <div class="result-grid">
+</section>
 
-    <div class="result-box">
-      <h4>Visible Concerns</h4>
-      <p id="concerns">Your AI analysis results will appear here.</p>
+<section id="scanner" class="scanner-section">
+
+  <div class="scanner">
+
+    <div
+      id="scanCounter"
+      class="scan-counter">
+      Checking your scan balance…
     </div>
 
-    <div class="result-box">
-      <h4>Your Skin May Need</h4>
-      <p id="needs">Your personalized skin needs will appear here.</p>
+    <div class="scanner-header">
+
+      <div class="eyebrow">
+        LUMÉRA LIVE SCAN
+      </div>
+
+      <h2>
+        Position your face <span>perfectly.</span>
+      </h2>
+
+      <div
+        id="selectedPlan"
+        class="selected-plan">
+        Luméra Scan
+      </div>
+
     </div>
 
-    <div class="result-box">
-      <h4>Your Routine</h4>
-      <p id="routine">Your personalized skincare routine will appear here.</p>
+    <div class="camera-frame">
+
+      <video
+        id="camera"
+        autoplay
+        playsinline>
+      </video>
+
+      <div class="face-guide"></div>
+      <div class="scan-line"></div>
+
+    </div>
+
+    <div class="scan-guidance">
+
+      <div
+        id="scanStatus"
+        class="scan-status">
+        Camera ready
+      </div>
+
+      <div
+        id="scanInstruction"
+        class="scan-instruction">
+        Position your face inside the oval.
+      </div>
+
+      <div class="scan-progress">
+        <div
+          id="scanProgress"
+          class="scan-progress-bar">
+        </div>
+      </div>
+
+      <div class="scan-actions">
+
+        <button
+          id="beginAnalysis"
+          class="primary"
+          onclick="beginGuidedScan()">
+          Begin Scan
+        </button>
+
+        <button
+          class="stop"
+          onclick="stopCamera()">
+          Close Camera
+        </button>
+
+      </div>
+
+      <div
+        id="cameraError"
+        style="color:#d9b8ff;margin-top:15px;font-size:13px">
+      </div>
+
+    </div>
+
+    <div id="result" class="result">
+
+      <div class="result-title">
+        Your Luméra Skin Snapshot
+      </div>
+
+      <div class="score-wrap">
+
+        <div class="score">
+
+          <div>
+            <strong id="scoreNumber">—</strong>
+            <small>/10</small>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="result-grid">
+
+        <div class="result-box">
+          <h4>Visible Concerns</h4>
+          <p id="concerns">
+            Your AI analysis results will appear here.
+          </p>
+        </div>
+
+        <div class="result-box">
+          <h4>Your Skin May Need</h4>
+          <p id="needs">
+            Your personalized skin needs will appear here.
+          </p>
+        </div>
+
+        <div class="result-box">
+          <h4>Your Routine</h4>
+          <p id="routine">
+            Your personalized skincare routine will appear here.
+          </p>
+        </div>
+
+      </div>
+
     </div>
 
   </div>
-</div>
 
-  </div>
-</section><section>
+</section>
+
+<section>
+
   <div class="section-heading">
-    <div class="eyebrow">REAL SKIN JOURNEYS</div>
-    <h2 class="section-title">Every skin story is <span>different.</span></h2>
-    <p>Luméra is built around personalized skincare journeys, because your skin deserves more than a one-size-fits-all routine.</p>
-  </div>  <div class="journey-image">
-    <img src="lumera-journeys.png" alt="Luméra skin journeys">
+
+    <div class="eyebrow">
+      REAL SKIN JOURNEYS
+    </div>
+
+    <h2 class="section-title">
+      Every skin story is <span>different.</span>
+    </h2>
+
+    <p>
+      Luméra is built around personalized skincare journeys,
+      because your skin deserves more than a one-size-fits-all routine.
+    </p>
+
   </div>
-</section><section id="products">
+
+  <div class="journey-image">
+    <img
+      src="lumera-journeys.png"
+      alt="Luméra skin journeys">
+  </div>
+
+</section>
+
+<section id="products">
+
   <div class="section-heading">
-    <div class="eyebrow">SKINCARE MARKETPLACE</div>
-    <h2 class="section-title">Discover products that <span>fit your journey.</span></h2>
-    <p>Luméra's vision is to connect users with well-known skincare products from around the world based on their needs.</p>
-  </div>  <div class="products-grid"><div class="product">
-  <div class="product-symbol">✦</div>
-  <h3>Anua</h3>
-  <p>Korean skincare focused on calming, hydration and balanced-looking skin.</p>
-  <span class="product-tag">K-BEAUTY</span>
-</div>
 
-<div class="product">
-  <div class="product-symbol">◇</div>
-  <h3>Medicube</h3>
-  <p>Skincare technology and targeted products for different visible skin concerns.</p>
-  <span class="product-tag">SKIN TECHNOLOGY</span>
-</div>
+    <div class="eyebrow">
+      SKINCARE MARKETPLACE
+    </div>
 
-<div class="product">
-  <div class="product-symbol">○</div>
-  <h3>CeraVe</h3>
-  <p>Well-known skincare focused on cleansing, moisturizing and supporting the skin barrier.</p>
-  <span class="product-tag">BARRIER CARE</span>
-</div>
+    <h2 class="section-title">
+      Discover products that <span>fit your journey.</span>
+    </h2>
 
-<div class="product">
-  <div class="product-symbol">✧</div>
-  <h3>La Roche-Posay</h3>
-  <p>Dermatology-inspired skincare with options for sensitive and blemish-prone skin.</p>
-  <span class="product-tag">DERM CARE</span>
-</div>
-
-<div class="product">
-  <div class="product-symbol">∞</div>
-  <h3>The Ordinary</h3>
-  <p>Ingredient-focused skincare with targeted options for different skincare goals.</p>
-  <span class="product-tag">ACTIVE CARE</span>
-</div>
-
-<div class="product">
-  <div class="product-symbol">✦</div>
-  <h3>COSRX</h3>
-  <p>Korean skincare with popular options for hydration, blemishes and skin texture.</p>
-  <span class="product-tag">K-BEAUTY</span>
-</div>
-
-<div class="product">
-  <div class="product-symbol">◇</div>
-  <h3>Beauty of Joseon</h3>
-  <p>Korean skincare inspired by traditional ingredients and modern formulations.</p>
-  <span class="product-tag">K-BEAUTY</span>
-</div>
-
-<div class="product">
-  <div class="product-symbol">♢</div>
-  <h3>Paula's Choice</h3>
-  <p>Ingredient-focused skincare with products targeting texture, pores and other concerns.</p>
-  <span class="product-tag">TARGETED CARE</span>
-</div>
-
-<div class="product">
-  <div class="product-symbol">✧</div>
-  <h3>Cetaphil</h3>
-  <p>Gentle skincare products commonly used for cleansing and moisturizing.</p>
-  <span class="product-tag">GENTLE CARE</span>
-</div>
-
-<div class="product">
-  <div class="product-symbol">○</div>
-  <h3>Eucerin</h3>
-  <p>Skincare solutions designed around hydration, tone and other skin concerns.</p>
-  <span class="product-tag">DERM CARE</span>
-</div>
-
-<div class="product">
-  <div class="product-symbol">✦</div>
-  <h3>Laneige</h3>
-  <p>Hydration-focused Korean skincare and beauty products.</p>
-  <span class="product-tag">HYDRATION</span>
-</div>
-
-<div class="product">
-  <div class="product-symbol">∞</div>
-  <h3>More Brands</h3>
-  <p>Luméra will continue expanding its skincare marketplace with more trusted brands and vendors.</p>
-  <span class="product-tag">EXPANDING</span>
-</div>
+    <p>
+      Luméra's vision is to connect users with well-known skincare products
+      from around the world based on their needs.
+    </p>
 
   </div>
-</section><section>  <div class="section-heading">
-    <div class="eyebrow">GENTLE SKINCARE</div>
-    <h2 class="section-title">Start with <span>the simple things.</span></h2>
-    <p>Products are only part of healthy skincare habits. Luméra can also provide simple, gentle care guidance.</p>
-  </div>  <div class="care-grid"><div class="care-card">
-  <h3>Gentle Care</h3>
-  <ul>
-    <li>Use a gentle cleanser.</li>
-    <li>Keep your skin moisturized.</li>
-    <li>Use a cool compress when soothing is needed.</li>
-    <li>Consider gentle aloe-based products if tolerated.</li>
-    <li>Use daily sun protection.</li>
-  </ul>
-</div>
 
-<div class="care-card">
-  <h3>Protect Your Skin</h3>
-  <ul>
-    <li>Do not place ice directly on your skin.</li>
-    <li>Avoid harsh physical scrubs.</li>
-    <li>Avoid squeezing breakouts.</li>
-    <li>Don't introduce many new products at once.</li>
-    <li>Stop products that clearly irritate your skin.</li>
-  </ul>
-</div>
+  <div class="products-grid">
+
+    <div class="product">
+      <div class="product-symbol">✦</div>
+      <h3>Anua</h3>
+      <p>
+        Korean skincare focused on calming, hydration and balanced-looking skin.
+      </p>
+      <span class="product-tag">K-BEAUTY</span>
+    </div>
+
+    <div class="product">
+      <div class="product-symbol">◇</div>
+      <h3>Medicube</h3>
+      <p>
+        Skincare technology and targeted products for different visible skin concerns.
+      </p>
+      <span class="product-tag">SKIN TECHNOLOGY</span>
+    </div>
+
+    <div class="product">
+      <div class="product-symbol">○</div>
+      <h3>CeraVe</h3>
+      <p>
+        Well-known skincare focused on cleansing, moisturizing and supporting the skin barrier.
+      </p>
+      <span class="product-tag">BARRIER CARE</span>
+    </div>
+
+    <div class="product">
+      <div class="product-symbol">✧</div>
+      <h3>La Roche-Posay</h3>
+      <p>
+        Dermatology-inspired skincare with options for sensitive and blemish-prone skin.
+      </p>
+      <span class="product-tag">DERM CARE</span>
+    </div>
+
+    <div class="product">
+      <div class="product-symbol">∞</div>
+      <h3>The Ordinary</h3>
+      <p>
+        Ingredient-focused skincare with targeted options for different skincare goals.
+      </p>
+      <span class="product-tag">ACTIVE CARE</span>
+    </div>
+
+    <div class="product">
+      <div class="product-symbol">✦</div>
+      <h3>COSRX</h3>
+      <p>
+        Korean skincare with popular options for hydration, blemishes and skin texture.
+      </p>
+      <span class="product-tag">K-BEAUTY</span>
+    </div>
+
+    <div class="product">
+      <div class="product-symbol">◇</div>
+      <h3>Beauty of Joseon</h3>
+      <p>
+        Korean skincare inspired by traditional ingredients and modern formulations.
+      </p>
+      <span class="product-tag">K-BEAUTY</span>
+    </div>
+
+    <div class="product">
+      <div class="product-symbol">♢</div>
+      <h3>Paula's Choice</h3>
+      <p>
+        Ingredient-focused skincare with products targeting texture, pores and other concerns.
+      </p>
+      <span class="product-tag">TARGETED CARE</span>
+    </div>
+
+    <div class="product">
+      <div class="product-symbol">✧</div>
+      <h3>Cetaphil</h3>
+      <p>
+        Gentle skincare products commonly used for cleansing and moisturizing.
+      </p>
+      <span class="product-tag">GENTLE CARE</span>
+    </div>
+
+    <div class="product">
+      <div class="product-symbol">○</div>
+      <h3>Eucerin</h3>
+      <p>
+        Skincare solutions designed around hydration, tone and other skin concerns.
+      </p>
+      <span class="product-tag">DERM CARE</span>
+    </div>
+
+    <div class="product">
+      <div class="product-symbol">✦</div>
+      <h3>Laneige</h3>
+      <p>
+        Hydration-focused Korean skincare and beauty products.
+      </p>
+      <span class="product-tag">HYDRATION</span>
+    </div>
+
+    <div class="product">
+      <div class="product-symbol">∞</div>
+      <h3>More Brands</h3>
+      <p>
+        Luméra will continue expanding its skincare marketplace
+        with more trusted brands and vendors.
+      </p>
+      <span class="product-tag">EXPANDING</span>
+    </div>
 
   </div>
-</section><section class="final-cta">
-  <div class="eyebrow">YOUR SKIN. YOUR JOURNEY.</div>
-  <h2>See your skin<br><span>differently.</span></h2>
-  <p>Choose your Luméra experience and begin understanding your skin in a completely new way.</p>
-  <a href="#access" class="primary">✦ Choose My Experience</a>
-</section><footer>
-  <div>
-    <div class="footer-logo">Lum<span>é</span>ra</div>
-    <p>Skincare Intelligence<br>A Geestablish product.</p>
-  </div>  <p>
-    Luméra provides skincare guidance and is not a medical diagnosis or substitute for professional medical advice.
+
+</section>
+
+<section>
+
+  <div class="section-heading">
+
+    <div class="eyebrow">
+      GENTLE SKINCARE
+    </div>
+
+    <h2 class="section-title">
+      Start with <span>the simple things.</span>
+    </h2>
+
+    <p>
+      Products are only part of healthy skincare habits.
+      Luméra can also provide simple, gentle care guidance.
+    </p>
+
+  </div>
+
+  <div class="care-grid">
+
+    <div class="care-card">
+
+      <h3>Gentle Care</h3>
+
+      <ul>
+        <li>Use a gentle cleanser.</li>
+        <li>Keep your skin moisturized.</li>
+        <li>Use a cool compress when soothing is needed.</li>
+        <li>Consider gentle aloe-based products if tolerated.</li>
+        <li>Use daily sun protection.</li>
+      </ul>
+
+    </div>
+
+    <div class="care-card">
+
+      <h3>Protect Your Skin</h3>
+
+      <ul>
+        <li>Do not place ice directly on your skin.</li>
+        <li>Avoid harsh physical scrubs.</li>
+        <li>Avoid squeezing breakouts.</li>
+        <li>Don't introduce many new products at once.</li>
+        <li>Stop products that clearly irritate your skin.</li>
+      </ul>
+
+    </div>
+
+  </div>
+
+</section>
+
+<section class="final-cta">
+
+  <div class="eyebrow">
+    YOUR SKIN. YOUR JOURNEY.
+  </div>
+
+  <h2>
+    See your skin<br>
+    <span>differently.</span>
+  </h2>
+
+  <p>
+    Choose your Luméra experience and begin understanding
+    your skin in a completely new way.
   </p>
-</footer><script>
+
+  <a
+    href="#access"
+    class="primary">
+    ✦ Choose My Experience
+  </a>
+
+</section>
+
+<footer>
+
+  <div>
+
+    <div class="footer-logo">
+      Lum<span>é</span>ra
+    </div>
+
+    <p>
+      Skincare Intelligence<br>
+      A Geestablish product.
+    </p>
+
+  </div>
+
+  <p>
+    Luméra provides skincare guidance and is not a medical diagnosis
+    or substitute for professional medical advice.
+  </p>
+
+</footer>
+
+<script>
+
 const PAYSTACK_LINKS = {
-  scan: "https://paystack.com/buy/lumra-3-scan-pass-yeocej",
-  standard: "https://paystack.com/buy/lumra-standard-umgyxu",
-  pro: "https://paystack.com/buy/lumra-pro-myhksc"
+
+  scan:
+    "https://paystack.com/buy/lumra-3-scan-pass-yeocej",
+
+  standard:
+    "https://paystack.com/buy/lumra-standard-umgyxu",
+
+  pro:
+    "https://paystack.com/buy/lumra-pro-myhksc"
+
 };
-
-const CLERK_PUBLISHABLE_KEY =
-  "pk_test_c3VidGxlLWV3ZS02NDYyLmNsZXJrLmFjY291bnRzLmRldiQ";
-
-const CLERK_FRONTEND_API =
-  "https://subtle-ewe-6462.clerk.accounts.dev";
 
 let clerkReady = false;
 let clerkPromise = null;
 let currentUser = null;
 let cameraStream = null;
 let scanRunning = false;
-let pendingPlan = null;
 
 function getPendingPlan(){
-  return localStorage.getItem("lumera_pending_plan") || null;
+
+  return localStorage.getItem(
+    "lumera_pending_plan"
+  ) || null;
+
 }
 
 function setPendingPlan(plan){
+
   if(plan){
-    localStorage.setItem("lumera_pending_plan", plan);
+
+    localStorage.setItem(
+      "lumera_pending_plan",
+      plan
+    );
+
   }else{
-    localStorage.removeItem("lumera_pending_plan");
+
+    localStorage.removeItem(
+      "lumera_pending_plan"
+    );
+
   }
+
 }
 
 function getUserEmail(){
-  return currentUser?.primaryEmailAddress?.emailAddress ||
-         currentUser?.emailAddresses?.[0]?.emailAddress ||
-         "";
+
+  return (
+    currentUser?.primaryEmailAddress?.emailAddress ||
+    currentUser?.emailAddresses?.[0]?.emailAddress ||
+    ""
+  );
+
 }
 
 async function waitForClerkScripts(){
 
-  if(window.Clerk && window.__internal_ClerkUICtor){
+  if(
+    window.Clerk &&
+    window.__internal_ClerkUICtor
+  ){
+
     return;
+
   }
 
   await new Promise((resolve,reject)=>{
 
-    const timeout = setTimeout(()=>{
-      reject(new Error("Clerk scripts did not load."));
-    },15000);
+    const timeout=setTimeout(
+      ()=>{
+        reject(
+          new Error(
+            "Clerk scripts did not load."
+          )
+        );
+      },
+      15000
+    );
 
-    const check = ()=>{
+    const check=()=>{
 
-      if(window.Clerk && window.__internal_ClerkUICtor){
+      if(
+        window.Clerk &&
+        window.__internal_ClerkUICtor
+      ){
 
         clearTimeout(timeout);
         resolve();
 
       }else{
 
-        setTimeout(check,50);
+        setTimeout(
+          check,
+          50
+        );
 
       }
 
@@ -452,49 +1377,64 @@ async function waitForClerkScripts(){
     check();
 
   });
+
 }
 
 async function ensureClerk(){
 
-  if(clerkReady && window.Clerk){
+  if(
+    clerkReady &&
+    window.Clerk
+  ){
+
     return window.Clerk;
+
   }
 
   if(clerkPromise){
+
     return clerkPromise;
+
   }
 
-  clerkPromise = (async()=>{
+  clerkPromise=(async()=>{
 
     await waitForClerkScripts();
 
     if(!window.Clerk){
-      throw new Error("ClerkJS did not load.");
-    }
 
-    if(!window.__internal_ClerkUICtor){
-      throw new Error("Clerk UI did not load.");
+      throw new Error(
+        "ClerkJS did not load."
+      );
+
     }
 
     await window.Clerk.load({
+
       ui:{
-        ClerkUI:window.__internal_ClerkUICtor
+        ClerkUI:
+          window.__internal_ClerkUICtor
       }
+
     });
 
     clerkReady=true;
 
-    currentUser=window.Clerk.user || null;
+    currentUser =
+      window.Clerk.user || null;
 
     updateAccountUI();
 
-    window.Clerk.addListener(({user})=>{
+    window.Clerk.addListener(
+      ({user})=>{
 
-      currentUser=user || null;
+        currentUser =
+          user || null;
 
-      updateAccountUI();
+        updateAccountUI();
 
-    });
+      }
+    );
 
     return window.Clerk;
 
@@ -502,56 +1442,91 @@ async function ensureClerk(){
 
     clerkPromise=null;
 
-    console.error("Luméra Clerk error:",error);
+    console.error(
+      "Luméra Clerk error:",
+      error
+    );
 
     throw error;
 
   });
 
   return clerkPromise;
+
 }
 
 function updateAccountUI(){
 
-  const button=document.getElementById("accountButton");
-  const bar=document.getElementById("accountBar");
-  const emailEl=document.getElementById("accountEmail");
+  const button =
+    document.getElementById(
+      "accountButton"
+    );
+
+  const bar =
+    document.getElementById(
+      "accountBar"
+    );
+
+  const emailEl =
+    document.getElementById(
+      "accountEmail"
+    );
 
   if(!button){
+
     return;
+
   }
 
   if(currentUser){
 
-    button.textContent="My Account";
+    button.textContent =
+      "My Account";
 
     if(bar){
-      bar.style.display="block";
+
+      bar.style.display =
+        "block";
+
     }
 
     if(emailEl){
-      emailEl.textContent=getUserEmail();
+
+      emailEl.textContent =
+        getUserEmail();
+
     }
 
   }else{
 
-    button.textContent="Sign in";
+    button.textContent =
+      "Sign in";
 
     if(bar){
-      bar.style.display="none";
+
+      bar.style.display =
+        "none";
+
     }
 
   }
+
 }
 
-async function openAuth(mode="signin",plan=null){
+async function openAuth(
+  mode="signin",
+  plan=null
+){
 
   try{
 
-    const clerk=await ensureClerk();
+    const clerk =
+      await ensureClerk();
 
     if(plan){
+
       setPendingPlan(plan);
+
     }
 
     const redirectUrl =
@@ -561,23 +1536,36 @@ async function openAuth(mode="signin",plan=null){
 
     const props={
 
-      forceRedirectUrl:redirectUrl,
+      forceRedirectUrl:
+        redirectUrl,
 
-      fallbackRedirectUrl:redirectUrl,
+      fallbackRedirectUrl:
+        redirectUrl,
 
-      signInForceRedirectUrl:redirectUrl,
+      signInForceRedirectUrl:
+        redirectUrl,
 
-      signInFallbackRedirectUrl:redirectUrl,
+      signInFallbackRedirectUrl:
+        redirectUrl,
 
       appearance:{
 
         variables:{
 
-          colorPrimary:"#8d4dff",
-          colorText:"#faf8ff",
-          colorBackground:"#100819",
-          colorInputBackground:"#08040d",
-          colorInputText:"#faf8ff"
+          colorPrimary:
+            "#8d4dff",
+
+          colorText:
+            "#faf8ff",
+
+          colorBackground:
+            "#100819",
+
+          colorInputBackground:
+            "#08040d",
+
+          colorInputText:
+            "#faf8ff"
 
         },
 
@@ -585,16 +1573,20 @@ async function openAuth(mode="signin",plan=null){
 
           card:{
             background:"#100819",
-            border:"1px solid rgba(178,111,255,.27)",
-            boxShadow:"0 30px 100px rgba(0,0,0,.5)"
+            border:
+              "1px solid rgba(178,111,255,.27)",
+            boxShadow:
+              "0 30px 100px rgba(0,0,0,.5)"
           },
 
           headerTitle:{
-            fontFamily:"Playfair Display, serif"
+            fontFamily:
+              "Playfair Display, serif"
           },
 
           formButtonPrimary:{
-            background:"linear-gradient(135deg,#7630f4,#b76dff)"
+            background:
+              "linear-gradient(135deg,#7630f4,#b76dff)"
           }
 
         }
@@ -615,7 +1607,10 @@ async function openAuth(mode="signin",plan=null){
 
   }catch(error){
 
-    console.error("Luméra authentication error:",error);
+    console.error(
+      "Luméra authentication error:",
+      error
+    );
 
     alert(
       "Luméra could not open the account system. Please refresh once and try again."
@@ -627,21 +1622,27 @@ async function openAuth(mode="signin",plan=null){
 
 async function continueToPaystack(plan){
 
-  const clerk=await ensureClerk();
+  const clerk =
+    await ensureClerk();
 
-  currentUser=clerk.user || null;
+  currentUser =
+    clerk.user || null;
 
   if(!currentUser){
 
     setPendingPlan(plan);
 
-    await openAuth("signup",plan);
+    await openAuth(
+      "signup",
+      plan
+    );
 
     return;
 
   }
 
-  const email=getUserEmail();
+  const email =
+    getUserEmail();
 
   if(!email){
 
@@ -672,7 +1673,9 @@ async function buyPlan(plan){
 
   if(!PAYSTACK_LINKS[plan]){
 
-    alert("Invalid Luméra plan.");
+    alert(
+      "Invalid Luméra plan."
+    );
 
     return;
 
@@ -680,25 +1683,30 @@ async function buyPlan(plan){
 
   try{
 
-    const clerk=await ensureClerk();
+    const clerk =
+      await ensureClerk();
 
-    currentUser=clerk.user || null;
+    currentUser =
+      clerk.user || null;
 
     updateAccountUI();
 
     if(!currentUser){
 
-      pendingPlan=plan;
-
       setPendingPlan(plan);
 
-      await openAuth("signup",plan);
+      await openAuth(
+        "signup",
+        plan
+      );
 
       return;
 
     }
 
-    await continueToPaystack(plan);
+    await continueToPaystack(
+      plan
+    );
 
   }catch(error){
 
@@ -716,7 +1724,8 @@ async function signOut(){
 
   try{
 
-    const clerk=await ensureClerk();
+    const clerk =
+      await ensureClerk();
 
     await clerk.signOut();
 
@@ -724,7 +1733,9 @@ async function signOut(){
 
     updateAccountUI();
 
-    document.getElementById("scanner").style.display="none";
+    document.getElementById(
+      "scanner"
+    ).style.display="none";
 
     stopCamera();
 
@@ -736,13 +1747,66 @@ async function signOut(){
 
 }
 
+async function getAccount(){
+
+  const clerk =
+    await ensureClerk();
+
+  if(!clerk.user){
+
+    return null;
+
+  }
+
+  const token =
+    await clerk.session?.getToken();
+
+  if(!token){
+
+    throw new Error(
+      "Your Luméra session could not be verified."
+    );
+
+  }
+
+  const response =
+    await fetch(
+      "/api/account",
+      {
+        method:"GET",
+
+        headers:{
+          Authorization:
+            "Bearer " + token
+        }
+      }
+    );
+
+  const data =
+    await response.json();
+
+  if(!response.ok){
+
+    throw new Error(
+      data.error ||
+      "Could not load your Luméra account."
+    );
+
+  }
+
+  return data;
+
+}
+
 async function openScanner(){
 
   try{
 
-    const clerk=await ensureClerk();
+    const clerk =
+      await ensureClerk();
 
-    currentUser=clerk.user || null;
+    currentUser =
+      clerk.user || null;
 
     if(!currentUser){
 
@@ -752,11 +1816,80 @@ async function openScanner(){
 
     }
 
-    document.getElementById("scanner").style.display="block";
+    const account =
+      await getAccount();
 
-    document
-      .getElementById("scanner")
-      .scrollIntoView({behavior:"smooth"});
+    const accountData =
+      account?.account;
+
+    const activePlan =
+      accountData?.plan;
+
+    const expires =
+      accountData?.plan_expires_at
+        ? new Date(
+            accountData.plan_expires_at
+          )
+        : null;
+
+    const subscriptionActive =
+      (
+        activePlan === "standard" ||
+        activePlan === "pro"
+      ) &&
+      expires &&
+      expires > new Date();
+
+    const credits =
+      Number(
+        accountData?.scan_credits || 0
+      );
+
+    if(
+      !subscriptionActive &&
+      credits <= 0
+    ){
+
+      alert(
+        "You have no active Luméra access. Purchase the 3-Scan Pass, Standard, or Pro."
+      );
+
+      document.getElementById(
+        "access"
+      ).scrollIntoView({
+        behavior:"smooth"
+      });
+
+      return false;
+
+    }
+
+    document.getElementById(
+      "scanCounter"
+    ).textContent =
+      subscriptionActive
+        ? "Active " +
+          activePlan.toUpperCase() +
+          " access"
+        : credits +
+          " scan(s) remaining";
+
+    document.getElementById(
+      "selectedPlan"
+    ).textContent =
+      subscriptionActive
+        ? activePlan.toUpperCase()
+        : "3-Scan Pass";
+
+    document.getElementById(
+      "scanner"
+    ).style.display="block";
+
+    document.getElementById(
+      "scanner"
+    ).scrollIntoView({
+      behavior:"smooth"
+    });
 
     await startCamera();
 
@@ -766,6 +1899,11 @@ async function openScanner(){
 
     console.error(error);
 
+    alert(
+      error.message ||
+      "Luméra could not check your account."
+    );
+
     return false;
 
   }
@@ -774,15 +1912,23 @@ async function openScanner(){
 
 async function startCamera(){
 
-  const error=document.getElementById("cameraError");
+  const error =
+    document.getElementById(
+      "cameraError"
+    );
 
   error.textContent="";
 
   try{
 
-    if(!navigator.mediaDevices?.getUserMedia){
+    if(
+      !navigator.mediaDevices ||
+      !navigator.mediaDevices.getUserMedia
+    ){
 
-      throw new Error("Camera unavailable");
+      throw new Error(
+        "Camera unavailable"
+      );
 
     }
 
@@ -790,21 +1936,34 @@ async function startCamera(){
       await navigator.mediaDevices.getUserMedia({
 
         video:{
-          facingMode:{ideal:"user"},
-          width:{ideal:720},
-          height:{ideal:720}
+          facingMode:{
+            ideal:"user"
+          },
+          width:{
+            ideal:720
+          },
+          height:{
+            ideal:720
+          }
         },
 
         audio:false
 
       });
 
-    document.getElementById("camera").srcObject=cameraStream;
+    document.getElementById(
+      "camera"
+    ).srcObject =
+      cameraStream;
 
-    document.getElementById("scanStatus").textContent =
+    document.getElementById(
+      "scanStatus"
+    ).textContent =
       "Camera ready";
 
-    document.getElementById("scanInstruction").textContent =
+    document.getElementById(
+      "scanInstruction"
+    ).textContent =
       "Position your face inside the oval.";
 
   }catch(e){
@@ -834,19 +1993,42 @@ async function beginGuidedScan(){
 
   }
 
+  /*
+   * Check account immediately before beginning.
+   * This prevents the page from relying on stale
+   * browser-side scan information.
+   */
+
+  const access =
+    await openScanner();
+
+  if(!access){
+
+    return;
+
+  }
+
   scanRunning=true;
 
   const status =
-    document.getElementById("scanStatus");
+    document.getElementById(
+      "scanStatus"
+    );
 
   const instruction =
-    document.getElementById("scanInstruction");
+    document.getElementById(
+      "scanInstruction"
+    );
 
   const progress =
-    document.getElementById("scanProgress");
+    document.getElementById(
+      "scanProgress"
+    );
 
   const button =
-    document.getElementById("beginAnalysis");
+    document.getElementById(
+      "beginAnalysis"
+    );
 
   button.style.display="none";
 
@@ -889,17 +2071,31 @@ async function beginGuidedScan(){
 
   ];
 
-  for(let i=0;i<steps.length;i++){
+  for(
+    let i=0;
+    i<steps.length;
+    i++
+  ){
 
-    status.textContent=steps[i][0];
+    status.textContent =
+      steps[i][0];
 
-    instruction.textContent=steps[i][1];
+    instruction.textContent =
+      steps[i][1];
 
     progress.style.width =
-      ((i+1)/steps.length*100)+"%";
+      (
+        ((i+1) /
+        steps.length) *
+        100
+      ) + "%";
 
     await new Promise(
-      r=>setTimeout(r,1800)
+      resolve =>
+        setTimeout(
+          resolve,
+          1800
+        )
     );
 
   }
@@ -912,16 +2108,25 @@ async function completeScan(){
 
   try{
 
-    document.getElementById("scanStatus").textContent =
+    document.getElementById(
+      "scanStatus"
+    ).textContent =
       "Analyzing your skin…";
 
-    document.getElementById("scanInstruction").textContent =
+    document.getElementById(
+      "scanInstruction"
+    ).textContent =
       "Luméra is preparing your personalized result.";
 
     const video =
-      document.getElementById("camera");
+      document.getElementById(
+        "camera"
+      );
 
-    if(!video.videoWidth || !video.videoHeight){
+    if(
+      !video.videoWidth ||
+      !video.videoHeight
+    ){
 
       throw new Error(
         "Camera image is not ready yet."
@@ -930,7 +2135,9 @@ async function completeScan(){
     }
 
     const canvas =
-      document.createElement("canvas");
+      document.createElement(
+        "canvas"
+      );
 
     const size =
       Math.min(
@@ -941,10 +2148,18 @@ async function completeScan(){
     canvas.width=size;
     canvas.height=size;
 
-    const ctx=canvas.getContext("2d");
+    const ctx =
+      canvas.getContext("2d");
 
-    ctx.translate(size,0);
-    ctx.scale(-1,1);
+    ctx.translate(
+      size,
+      0
+    );
+
+    ctx.scale(
+      -1,
+      1
+    );
 
     const sx =
       (video.videoWidth-size)/2;
@@ -970,15 +2185,37 @@ async function completeScan(){
         0.86
       );
 
+    const clerk =
+      await ensureClerk();
+
+    const token =
+      await clerk.session?.getToken();
+
+    if(!token){
+
+      throw new Error(
+        "Your Luméra session expired. Please sign in again."
+      );
+
+    }
+
     const response =
       await fetch(
         "/api/analyze-skin",
         {
           method:"POST",
+
           headers:{
-            "Content-Type":"application/json"
+            "Content-Type":
+              "application/json",
+
+            Authorization:
+              "Bearer " + token
           },
-          body:JSON.stringify({image})
+
+          body:JSON.stringify({
+            image:image
+          })
         }
       );
 
@@ -994,58 +2231,133 @@ async function completeScan(){
 
     }
 
-    document.getElementById("scoreNumber").textContent =
-      data.score ?? "—";
+    /*
+     * The API returns:
+     *
+     * {
+     *   success:true,
+     *   analysis:{...},
+     *   access:{...}
+     * }
+     */
 
-    document.getElementById("concerns").textContent =
-      Array.isArray(data.concerns)
-        ? data.concerns.join(" • ")
+    const analysis =
+      data.analysis || data;
+
+    document.getElementById(
+      "scoreNumber"
+    ).textContent =
+      analysis.score ??
+      "—";
+
+    document.getElementById(
+      "concerns"
+    ).textContent =
+      Array.isArray(
+        analysis.concerns
+      )
+        ? analysis.concerns.join(
+            " • "
+          )
         : (
-            data.concerns ||
-            data.summary ||
+            analysis.concerns ||
+            analysis.summary ||
             "No concerns returned."
           );
 
-    document.getElementById("needs").textContent =
-      Array.isArray(data.needs)
-        ? data.needs.join(" • ")
+    document.getElementById(
+      "needs"
+    ).textContent =
+      Array.isArray(
+        analysis.needs
+      )
+        ? analysis.needs.join(
+            " • "
+          )
         : (
-            data.needs ||
+            analysis.needs ||
             "No needs returned."
           );
 
     const morning =
-      Array.isArray(data.morning_routine)
-        ? data.morning_routine.join(" • ")
+      Array.isArray(
+        analysis.morning_routine
+      )
+        ? analysis.morning_routine.join(
+            " • "
+          )
         : (
-            data.morning_routine || ""
+            analysis.morning_routine ||
+            ""
           );
 
     const night =
-      Array.isArray(data.night_routine)
-        ? data.night_routine.join(" • ")
+      Array.isArray(
+        analysis.night_routine
+      )
+        ? analysis.night_routine.join(
+            " • "
+          )
         : (
-            data.night_routine || ""
+            analysis.night_routine ||
+            ""
           );
 
-    document.getElementById("routine").textContent =
+    document.getElementById(
+      "routine"
+    ).textContent =
       [
-        morning && "Morning: "+morning,
-        night && "Night: "+night
+        morning &&
+          "Morning: " +
+          morning,
+
+        night &&
+          "Night: " +
+          night
+
       ]
       .filter(Boolean)
       .join("\n\n") ||
-      data.routine ||
+      analysis.routine ||
       "Your personalized routine will appear here.";
 
-    document.getElementById("result").style.display="block";
+    /*
+     * Update the visible remaining
+     * scan balance from the server.
+     */
 
-    document
-      .getElementById("result")
-      .scrollIntoView({
-        behavior:"smooth",
-        block:"center"
-      });
+    if(data.access){
+
+      const remaining =
+        Number(
+          data.access.scan_credits || 0
+        );
+
+      const plan =
+        data.access.plan;
+
+      document.getElementById(
+        "scanCounter"
+      ).textContent =
+        plan
+          ? "Active " +
+            plan.toUpperCase() +
+            " access"
+          : remaining +
+            " scan(s) remaining";
+
+    }
+
+    document.getElementById(
+      "result"
+    ).style.display="block";
+
+    document.getElementById(
+      "result"
+    ).scrollIntoView({
+      behavior:"smooth",
+      block:"center"
+    });
 
   }catch(error){
 
@@ -1075,14 +2387,19 @@ function stopCamera(){
 
     cameraStream
       .getTracks()
-      .forEach(t=>t.stop());
+      .forEach(
+        track =>
+          track.stop()
+      );
 
     cameraStream=null;
 
   }
 
   const video =
-    document.getElementById("camera");
+    document.getElementById(
+      "camera"
+    );
 
   if(video){
 
@@ -1091,11 +2408,14 @@ function stopCamera(){
   }
 
   const button =
-    document.getElementById("beginAnalysis");
+    document.getElementById(
+      "beginAnalysis"
+    );
 
   if(button){
 
-    button.style.display="inline-flex";
+    button.style.display =
+      "inline-flex";
 
   }
 
@@ -1107,18 +2427,23 @@ async function init(){
 
   try{
 
-    const clerk=await ensureClerk();
+    const clerk =
+      await ensureClerk();
 
-    currentUser=clerk.user || null;
+    currentUser =
+      clerk.user || null;
 
     updateAccountUI();
 
-    const plan=getPendingPlan();
+    const plan =
+      getPendingPlan();
 
     const returnedFromAuth =
       new URLSearchParams(
         window.location.search
-      ).get("lumera_auth_return")==="1";
+      ).get(
+        "lumera_auth_return"
+      ) === "1";
 
     if(
       plan &&
@@ -1128,24 +2453,11 @@ async function init(){
 
       setPendingPlan(null);
 
-      await continueToPaystack(plan);
+      await continueToPaystack(
+        plan
+      );
 
       return;
-
-    }
-
-    const urlPlan =
-      new URLSearchParams(
-        window.location.search
-      ).get("plan");
-
-    if(
-      urlPlan &&
-      PAYSTACK_LINKS[urlPlan] &&
-      !currentUser
-    ){
-
-      setPendingPlan(urlPlan);
 
     }
 
@@ -1166,5 +2478,8 @@ window.addEventListener(
   "load",
   init
 );
-</script></body>
-    </html>
+
+</script>
+
+</body>
+  </html>
