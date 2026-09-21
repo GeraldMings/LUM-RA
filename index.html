@@ -1903,107 +1903,42 @@ function getUserEmail(){
    BUY PLAN
 ========================================================= */
 
-async function buyPlan(plan){
+async function buyPlan(plan) {
+  const links = {
+    scan: "https://paystack.com/buy/lumra-3-scan-pass-yeocej",
+    standard: "https://paystack.com/buy/lumra-standard-umgyxu",
+    pro: "https://paystack.com/buy/lumra-pro-myhksc"
+  };
 
-  try{
+  const link = links[plan];
 
-    const clerk = await waitForClerk();
-
-    currentUser = clerk.user;
-
-    updateAccountUI();
-
-
-    /*
-      If the user isn't signed in,
-      open Clerk signup.
-
-      After account creation they can
-      click the plan again.
-    */
-
-    if(!currentUser){
-
-      pendingPlan = plan;
-
-      clerk.openSignUp();
-
-      return;
-
-    }
-
-
-    const email = getUserEmail();
-
-
-    if(!email){
-
-      alert(
-        "Your Luméra account does not have an email address yet."
-      );
-
-      return;
-
-    }
-
-
-    let paymentURL = "";
-
-
-    if(plan === "scan"){
-
-      paymentURL =
-        PAYSTACK_LINKS.scan;
-
-    }
-
-    if(plan === "standard"){
-
-      paymentURL =
-        PAYSTACK_LINKS.standard;
-
-    }
-
-    if(plan === "pro"){
-
-      paymentURL =
-        PAYSTACK_LINKS.pro;
-
-    }
-
-
-    /*
-      Pass the Clerk account email to Paystack.
-
-      The backend webhook can later use this email
-      to connect the payment to the Clerk account.
-    */
-
-    const separator =
-      paymentURL.includes("?")
-        ? "&"
-        : "?";
-
-    paymentURL +=
-      separator +
-      "email=" +
-      encodeURIComponent(email);
-
-
-    window.location.href =
-      paymentURL;
-
-  }catch(error){
-
-    console.error(error);
-
-    alert(
-      "Something went wrong. Please try again."
-    );
-
+  if (!link) {
+    console.error("Unknown Luméra plan:", plan);
+    return;
   }
 
-}
+  // If Clerk is available and the user is not signed in,
+  // open the Luméra account sign-up.
+  if (window.Clerk) {
+    if (!window.Clerk.user) {
+      window.Clerk.openSignUp();
+      return;
+    }
+
+    const email =
+      window.Clerk.user.primaryEmailAddress?.emailAddress;
+
+    if (email) {
+      const separator = link.includes("?") ? "&" : "?";
+      window.location.href =
+        link + separator + "email=" + encodeURIComponent(email);
+      return;
+    }
+  }
+
+  // Fallback: still open Paystack.
+  window.location.href = link;
+  }
 
 
 /* =========================================================
