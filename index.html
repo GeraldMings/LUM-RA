@@ -6,9 +6,19 @@
 
 <title>Luméra — Skincare Intelligence</title>
 
-<meta name="description" content="Luméra helps you understand your skin through intelligent facial analysis and personalized skincare recommendations.">
+<meta
+  name="description"
+  content="Luméra helps you understand your skin through intelligent facial analysis and personalized skincare recommendations."
+>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- CLERK -->
+<script
+  defer
+  crossorigin="anonymous"
+  data-clerk-publishable-key="pk_test_c3VidGxlLWV3ZS02NDYyLmNsZXJrLmFjY291bnRzLmRldiQ"
+  src="https://subtle-ewe-6462.clerk.accounts.dev/npm/@clerk/clerk-js@6/dist/clerk.browser.js"
+  type="text/javascript">
+</script>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap');
@@ -21,17 +31,17 @@
   --lav:#d7b7ff;
   --white:#faf8ff;
   --muted:#b7adbf;
-  --border:rgba(178,111,255,.27)
+  --border:rgba(178,111,255,.27);
 }
 
 *{
   box-sizing:border-box;
   margin:0;
-  padding:0
+  padding:0;
 }
 
 html{
-  scroll-behavior:smooth
+  scroll-behavior:smooth;
 }
 
 body{
@@ -43,16 +53,16 @@ body{
     ),
     var(--black);
   color:var(--white);
-  font-family:"DM Sans",sans-serif
+  font-family:"DM Sans",sans-serif;
 }
 
 a{
   text-decoration:none;
-  color:inherit
+  color:inherit;
 }
 
 button{
-  font:inherit
+  font:inherit;
 }
 
 nav{
@@ -67,13 +77,13 @@ nav{
   align-items:center;
   background:rgba(5,3,8,.82);
   backdrop-filter:blur(20px);
-  border-bottom:1px solid rgba(255,255,255,.06)
+  border-bottom:1px solid rgba(255,255,255,.06);
 }
 
 .logo,
 .footer-logo{
   font:600 28px "Playfair Display",serif;
-  letter-spacing:1px
+  letter-spacing:1px;
 }
 
 .logo span,
@@ -82,22 +92,22 @@ h1 span,
 .section-title span,
 .final-cta h2 span{
   color:var(--purple2);
-  font-style:italic
+  font-style:italic;
 }
 
 .nav-links{
   display:flex;
   gap:25px;
-  align-items:center
+  align-items:center;
 }
 
 .nav-links a{
   color:#c8bdcf;
-  font-size:14px
+  font-size:14px;
 }
 
 .nav-links a:hover{
-  color:var(--purple2)
+  color:var(--purple2);
 }
 
 .nav-account{
@@ -106,7 +116,7 @@ h1 span,
   border-radius:25px;
   background:rgba(140,70,255,.13);
   cursor:pointer;
-  color:white
+  color:white;
 }
 
 .hero{
@@ -115,7 +125,7 @@ h1 span,
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:55px;
-  align-items:center
+  align-items:center;
 }
 
 .eyebrow{
@@ -123,12 +133,12 @@ h1 span,
   letter-spacing:4px;
   font-size:11px;
   text-transform:uppercase;
-  margin-bottom:18px
+  margin-bottom:18px;
 }
 
 h1{
   font:600 clamp(55px,8vw,95px)/.98 "Playfair Display",serif;
-  letter-spacing:-3px
+  letter-spacing:-3px;
 }
 
 .hero-text{
@@ -136,13 +146,13 @@ h1{
   color:#c3b9ca;
   font-size:18px;
   line-height:1.8;
-  margin:27px 0
+  margin:27px 0;
 }
 
 .hero-buttons{
   display:flex;
   gap:12px;
-  flex-wrap:wrap
+  flex-wrap:wrap;
 }
 
 .primary,
@@ -152,7 +162,7 @@ h1{
   justify-content:center;
   padding:15px 25px;
   border-radius:40px;
-  cursor:pointer
+  cursor:pointer;
 }
 
 .primary{
@@ -160,39 +170,39 @@ h1{
   color:#fff;
   font-weight:700;
   background:linear-gradient(135deg,#7630f4,#b76dff);
-  box-shadow:0 0 40px rgba(137,58,255,.3)
+  box-shadow:0 0 40px rgba(137,58,255,.3);
 }
 
 .secondary{
   border:1px solid var(--border);
-  background:rgba(255,255,255,.035)
+  background:rgba(255,255,255,.035);
 }
 
 .hero-image img,
 .journey-image img{
   width:100%;
   border-radius:30px;
-  border:1px solid var(--border)
+  border:1px solid var(--border);
 }
 
 section{
-  padding:95px 7%
+  padding:95px 7%;
 }
 
 .section-heading{
   max-width:750px;
   text-align:center;
-  margin:0 auto 50px
+  margin:0 auto 50px;
 }
 
 .section-title{
   font:600 clamp(40px,5vw,65px)/1.05 "Playfair Display",serif;
-  margin-bottom:15px
+  margin-bottom:15px;
 }
 
 .section-heading p{
   color:var(--muted);
-  line-height:1.8
+  line-height:1.8;
 }
 
 .access-grid,
@@ -201,11 +211,11 @@ section{
   max-width:1150px;
   margin:auto;
   display:grid;
-  gap:20px
+  gap:20px;
 }
 
 .access-grid{
-  grid-template-columns:repeat(3,1fr)
+  grid-template-columns:repeat(3,1fr);
 }
 
 .access-card,
@@ -219,47 +229,47 @@ section{
       145deg,
       rgba(31,14,48,.9),
       rgba(9,4,14,.95)
-    )
+    );
 }
 
 .access-card{
   display:flex;
-  flex-direction:column
+  flex-direction:column;
 }
 
 .access-icon,
 .product-symbol{
   font-size:32px;
   color:var(--purple2);
-  margin-bottom:15px
+  margin-bottom:15px;
 }
 
 .access-card h3,
 .product h3,
 .care-card h3{
-  font-family:"Playfair Display",serif
+  font-family:"Playfair Display",serif;
 }
 
 .access-card h3{
-  font-size:29px
+  font-size:29px;
 }
 
 .price{
   font-size:27px;
   font-weight:700;
-  margin:17px 0
+  margin:17px 0;
 }
 
 .price small{
   font-size:13px;
   color:var(--muted);
-  font-weight:400
+  font-weight:400;
 }
 
 .access-card ul,
 .care-card ul{
   list-style:none;
-  margin:15px 0 20px
+  margin:15px 0 20px;
 }
 
 .access-card li,
@@ -267,46 +277,46 @@ section{
   color:#c8bdcf;
   margin:12px 0;
   font-size:14px;
-  line-height:1.6
+  line-height:1.6;
 }
 
 .access-card li:before,
 .care-card li:before{
   content:"✦";
   color:var(--purple2);
-  margin-right:8px
+  margin-right:8px;
 }
 
 .plan-button{
   width:100%;
-  margin-top:auto
+  margin-top:auto;
 }
 
 .locked-note{
   text-align:center;
   color:#93889d;
   font-size:12px;
-  margin-top:12px
+  margin-top:12px;
 }
 
 .products-grid{
-  grid-template-columns:repeat(4,1fr)
+  grid-template-columns:repeat(4,1fr);
 }
 
 .product{
-  min-height:210px
+  min-height:210px;
 }
 
 .product h3{
   font-size:24px;
-  margin-bottom:8px
+  margin-bottom:8px;
 }
 
 .product p,
 .care-card li{
   color:var(--muted);
   line-height:1.65;
-  font-size:13px
+  font-size:13px;
 }
 
 .product-tag{
@@ -316,18 +326,18 @@ section{
   border-radius:15px;
   background:rgba(139,77,255,.13);
   color:var(--lav);
-  font-size:10px
+  font-size:10px;
 }
 
 .care-grid{
   grid-template-columns:1fr 1fr;
-  max-width:1000px
+  max-width:1000px;
 }
 
 .care-card h3{
   color:var(--purple2);
   font-size:27px;
-  margin-bottom:15px
+  margin-bottom:15px;
 }
 
 .final-cta{
@@ -337,18 +347,18 @@ section{
       circle,
       rgba(129,48,255,.18),
       transparent 55%
-    )
+    );
 }
 
 .final-cta h2{
-  font:600 clamp(43px,6vw,75px) "Playfair Display",serif
+  font:600 clamp(43px,6vw,75px) "Playfair Display",serif;
 }
 
 .final-cta p{
   max-width:600px;
   margin:20px auto 30px;
   color:var(--muted);
-  line-height:1.8
+  line-height:1.8;
 }
 
 footer{
@@ -356,295 +366,18 @@ footer{
   border-top:1px solid rgba(255,255,255,.07);
   display:flex;
   justify-content:space-between;
-  gap:30px
+  gap:30px;
 }
 
 footer p{
   color:#83788c;
   font-size:13px;
   line-height:1.7;
-  max-width:500px
-}
-
-/* SCANNER */
-
-.scanner-section{
-  display:none
-}
-
-.scanner{
-  max-width:1050px;
-  margin:auto;
-  padding:35px;
-  border-radius:32px;
-  border:1px solid var(--border);
-  background:rgba(13,6,21,.95)
-}
-
-.scanner-header{
-  text-align:center;
-  margin-bottom:28px
-}
-
-.scanner-header h2{
-  font:600 45px "Playfair Display",serif
-}
-
-.scanner-header h2 span{
-  color:var(--purple2)
-}
-
-.selected-plan{
-  display:inline-block;
-  margin-top:10px;
-  padding:7px 13px;
-  border-radius:20px;
-  background:rgba(139,77,255,.14);
-  color:var(--lav);
-  font-size:12px
-}
-
-.scan-counter{
-  text-align:center;
-  color:var(--lav);
-  margin-bottom:15px;
-  font-size:14px
-}
-
-.camera-frame{
-  position:relative;
-  width:100%;
-  max-width:520px;
-  aspect-ratio:1;
-  margin:auto;
-  overflow:hidden;
-  border-radius:28px;
-  background:#020103;
-  border:1px solid rgba(192,130,255,.55)
-}
-
-video{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  transform:scaleX(-1)
-}
-
-.face-guide{
-  position:absolute;
-  width:60%;
-  height:76%;
-  left:20%;
-  top:12%;
-  border:2px solid rgba(214,178,255,.85);
-  border-radius:50%;
-  pointer-events:none
-}
-
-.scan-line{
-  position:absolute;
-  width:65%;
-  left:17.5%;
-  height:2px;
-  background:var(--purple2);
-  box-shadow:0 0 20px var(--purple2);
-  animation:scanline 2.2s infinite
-}
-
-@keyframes scanline{
-  0%,100%{top:22%}
-  50%{top:78%}
-}
-
-.scan-guidance{
-  text-align:center;
-  margin-top:22px
-}
-
-.scan-status{
-  font:30px "Playfair Display",serif;
-  color:var(--purple2)
-}
-
-.scan-instruction{
-  color:#ded4e5;
-  margin:7px 0;
-  min-height:24px
-}
-
-.scan-progress{
-  height:6px;
   max-width:500px;
-  margin:18px auto;
-  background:#24152f;
-  border-radius:10px;
-  overflow:hidden
 }
 
-.scan-progress-bar{
-  height:100%;
-  width:0;
-  background:linear-gradient(90deg,#7730ed,#c17aff);
-  transition:.4s
-}
 
-.scan-actions{
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  flex-wrap:wrap
-}
-
-.stop{
-  border:1px solid rgba(255,255,255,.15);
-  background:rgba(255,255,255,.04);
-  color:white;
-  padding:12px 19px;
-  border-radius:30px;
-  cursor:pointer
-}
-
-.result{
-  display:none;
-  max-width:900px;
-  margin:40px auto 0;
-  padding:30px;
-  border-radius:28px;
-  border:1px solid var(--border);
-  background:rgba(255,255,255,.025)
-}
-
-.result-title{
-  text-align:center;
-  font:36px "Playfair Display",serif;
-  margin-bottom:20px
-}
-
-.score-wrap{
-  display:flex;
-  justify-content:center
-}
-
-.score{
-  width:150px;
-  height:150px;
-  border-radius:50%;
-  display:grid;
-  place-items:center;
-  background:
-    radial-gradient(circle,#09050e 57%,transparent 58%),
-    conic-gradient(#b66eff 80%,#281532 0)
-}
-
-.score strong{
-  font:55px "Playfair Display",serif
-}
-
-.score small{
-  color:var(--muted)
-}
-
-.result-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:15px;
-  margin-top:25px
-}
-
-.result-box{
-  padding:20px;
-  border-radius:20px;
-  border:1px solid rgba(176,110,255,.2);
-  background:rgba(23,10,34,.7)
-}
-
-.result-box h4{
-  color:var(--purple2);
-  margin-bottom:9px
-}
-
-.result-box p{
-  color:var(--muted);
-  line-height:1.6;
-  font-size:14px
-}
-
-/* AUTH */
-
-.modal{
-  display:none;
-  position:fixed;
-  z-index:3000;
-  inset:0;
-  background:rgba(0,0,0,.75);
-  backdrop-filter:blur(8px);
-  align-items:center;
-  justify-content:center;
-  padding:20px
-}
-
-.modal.show{
-  display:flex
-}
-
-.modal-box{
-  width:min(430px,100%);
-  padding:30px;
-  border:1px solid var(--border);
-  border-radius:28px;
-  background:#100819;
-  box-shadow:0 30px 100px rgba(0,0,0,.5)
-}
-
-.modal-box h2{
-  font:34px "Playfair Display",serif;
-  margin-bottom:8px
-}
-
-.modal-box p{
-  color:var(--muted);
-  font-size:13px;
-  line-height:1.6
-}
-
-.modal-box input{
-  width:100%;
-  margin-top:12px;
-  padding:14px;
-  border-radius:12px;
-  border:1px solid var(--border);
-  background:#08040d;
-  color:white;
-  outline:none
-}
-
-.modal-box .primary{
-  width:100%;
-  margin-top:15px
-}
-
-.modal-close{
-  float:right;
-  background:none;
-  border:0;
-  color:#aaa;
-  font-size:24px;
-  cursor:pointer
-}
-
-.auth-switch{
-  text-align:center;
-  margin-top:15px;
-  color:var(--muted);
-  font-size:13px
-}
-
-.auth-switch button{
-  background:none;
-  border:0;
-  color:var(--purple2);
-  cursor:pointer
-}
+/* ACCOUNT */
 
 .account-bar{
   display:none;
@@ -656,7 +389,7 @@ video{
   border:1px solid var(--border);
   border-radius:20px;
   background:#100819;
-  font-size:12px
+  font-size:12px;
 }
 
 .account-bar button{
@@ -664,72 +397,315 @@ video{
   background:none;
   border:0;
   color:var(--purple2);
-  cursor:pointer
+  cursor:pointer;
 }
 
-.notice{
+
+/* SCANNER */
+
+.scanner-section{
   display:none;
-  margin:12px 0;
-  padding:11px;
-  border-radius:10px;
-  font-size:13px;
-  background:rgba(141,77,255,.1);
-  color:var(--lav)
 }
+
+.scanner{
+  max-width:1050px;
+  margin:auto;
+  padding:35px;
+  border-radius:32px;
+  border:1px solid var(--border);
+  background:rgba(13,6,21,.95);
+}
+
+.scanner-header{
+  text-align:center;
+  margin-bottom:28px;
+}
+
+.scanner-header h2{
+  font:600 45px "Playfair Display",serif;
+}
+
+.scanner-header h2 span{
+  color:var(--purple2);
+}
+
+.selected-plan{
+  display:inline-block;
+  margin-top:10px;
+  padding:7px 13px;
+  border-radius:20px;
+  background:rgba(139,77,255,.14);
+  color:var(--lav);
+  font-size:12px;
+}
+
+.scan-counter{
+  text-align:center;
+  color:var(--lav);
+  margin-bottom:15px;
+  font-size:14px;
+}
+
+.camera-frame{
+  position:relative;
+  width:100%;
+  max-width:520px;
+  aspect-ratio:1;
+  margin:auto;
+  overflow:hidden;
+  border-radius:28px;
+  background:#020103;
+  border:1px solid rgba(192,130,255,.55);
+}
+
+video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transform:scaleX(-1);
+}
+
+.face-guide{
+  position:absolute;
+  width:60%;
+  height:76%;
+  left:20%;
+  top:12%;
+  border:2px solid rgba(214,178,255,.85);
+  border-radius:50%;
+  pointer-events:none;
+}
+
+.scan-line{
+  position:absolute;
+  width:65%;
+  left:17.5%;
+  height:2px;
+  background:var(--purple2);
+  box-shadow:0 0 20px var(--purple2);
+  animation:scanline 2.2s infinite;
+}
+
+@keyframes scanline{
+  0%,100%{top:22%}
+  50%{top:78%}
+}
+
+.scan-guidance{
+  text-align:center;
+  margin-top:22px;
+}
+
+.scan-status{
+  font:30px "Playfair Display",serif;
+  color:var(--purple2);
+}
+
+.scan-instruction{
+  color:#ded4e5;
+  margin:7px 0;
+  min-height:24px;
+}
+
+.scan-progress{
+  height:6px;
+  max-width:500px;
+  margin:18px auto;
+  background:#24152f;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+.scan-progress-bar{
+  height:100%;
+  width:0;
+  background:linear-gradient(90deg,#7730ed,#c17aff);
+  transition:.4s;
+}
+
+.scan-actions{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.stop{
+  border:1px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.04);
+  color:white;
+  padding:12px 19px;
+  border-radius:30px;
+  cursor:pointer;
+}
+
+
+/* RESULTS */
+
+.result{
+  display:none;
+  max-width:900px;
+  margin:40px auto 0;
+  padding:30px;
+  border-radius:28px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.025);
+}
+
+.result-title{
+  text-align:center;
+  font:36px "Playfair Display",serif;
+  margin-bottom:20px;
+}
+
+.score-wrap{
+  display:flex;
+  justify-content:center;
+}
+
+.score{
+  width:150px;
+  height:150px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:
+    radial-gradient(
+      circle,
+      #09050e 57%,
+      transparent 58%
+    ),
+    conic-gradient(
+      #b66eff 80%,
+      #281532 0
+    );
+}
+
+.score strong{
+  font:55px "Playfair Display",serif;
+}
+
+.score small{
+  color:var(--muted);
+}
+
+.result-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
+  margin-top:25px;
+}
+
+.result-box{
+  padding:20px;
+  border-radius:20px;
+  border:1px solid rgba(176,110,255,.2);
+  background:rgba(23,10,34,.7);
+}
+
+.result-box h4{
+  color:var(--purple2);
+  margin-bottom:9px;
+}
+
+.result-box p{
+  color:var(--muted);
+  line-height:1.6;
+  font-size:14px;
+}
+
+.recommendations{
+  margin-top:20px;
+  padding:22px;
+  border-radius:20px;
+  border:1px solid rgba(176,110,255,.2);
+  background:rgba(23,10,34,.7);
+}
+
+.recommendations h4{
+  color:var(--purple2);
+  margin-bottom:10px;
+}
+
+.recommendations p{
+  color:var(--muted);
+  line-height:1.7;
+  font-size:14px;
+}
+
+
+/* LOGIN AREA */
+
+.auth-area{
+  display:none;
+}
+
+
+/* LOADING */
+
+.loading{
+  opacity:.7;
+  pointer-events:none;
+}
+
+
+/* MOBILE */
 
 @media(max-width:900px){
+
   .hero{
-    grid-template-columns:1fr
+    grid-template-columns:1fr;
   }
 
   .access-grid,
   .products-grid{
-    grid-template-columns:1fr 1fr
+    grid-template-columns:1fr 1fr;
   }
 
   .result-grid{
-    grid-template-columns:1fr
+    grid-template-columns:1fr;
   }
 
   .nav-links{
-    display:none
+    display:none;
   }
 }
 
 @media(max-width:600px){
+
   section{
-    padding:70px 5%
+    padding:70px 5%;
   }
 
   .hero{
-    padding:125px 5% 70px
+    padding:125px 5% 70px;
   }
 
   h1{
-    font-size:55px
+    font-size:55px;
   }
 
   .hero-buttons{
-    flex-direction:column
+    flex-direction:column;
   }
 
   .primary,
   .secondary{
-    width:100%
+    width:100%;
   }
 
   .access-grid,
   .products-grid,
   .care-grid{
-    grid-template-columns:1fr
+    grid-template-columns:1fr;
   }
 
   .scanner{
-    padding:20px
+    padding:20px;
   }
 
   footer{
-    flex-direction:column
+    flex-direction:column;
   }
 }
 </style>
@@ -738,27 +714,41 @@ video{
 <body>
 
 <nav>
-  <a href="#" class="logo">Lum<span>é</span>ra</a>
+
+  <a href="#" class="logo">
+    Lum<span>é</span>ra
+  </a>
 
   <div class="nav-links">
+
     <a href="#about">About</a>
+
     <a href="#products">Products</a>
+
     <a href="#access">Access</a>
 
     <button
       class="nav-account"
       id="accountButton"
-      onclick="openAuth('signin')"
-    >
+      onclick="handleAccountButton()">
       Sign in
     </button>
+
   </div>
+
 </nav>
 
+
 <div id="accountBar" class="account-bar">
+
   <span id="accountEmail"></span>
-  <button onclick="signOut()">Sign out</button>
+
+  <button onclick="signOut()">
+    Sign out
+  </button>
+
 </div>
+
 
 <header class="hero">
 
@@ -780,6 +770,7 @@ video{
     </p>
 
     <div class="hero-buttons">
+
       <a href="#access" class="primary">
         ✦ Start My Skin Journey
       </a>
@@ -787,18 +778,21 @@ video{
       <a href="#about" class="secondary">
         Discover Luméra
       </a>
+
     </div>
 
   </div>
 
   <div class="hero-image">
+
     <img
       src="lumera-beauty.png"
-      alt="Luméra skincare"
-    >
+      alt="Luméra skincare">
+
   </div>
 
 </header>
+
 
 <section id="about">
 
@@ -820,6 +814,7 @@ video{
 
   </div>
 
+
   <div class="access-grid">
 
     <div class="access-card">
@@ -833,10 +828,12 @@ video{
       </h3>
 
       <p>
-        Use your phone camera and follow Luméra's positioning guidance.
+        Use your phone camera and follow Luméra's
+        positioning guidance.
       </p>
 
     </div>
+
 
     <div class="access-card">
 
@@ -849,11 +846,12 @@ video{
       </h3>
 
       <p>
-        Receive an AI-powered view of visible skin characteristics
-        and concerns.
+        Receive an AI-powered view of visible skin
+        characteristics and concerns.
       </p>
 
     </div>
+
 
     <div class="access-card">
 
@@ -866,8 +864,8 @@ video{
       </h3>
 
       <p>
-        Get skincare guidance, product recommendations and a
-        routine built around your results.
+        Get skincare guidance, product recommendations
+        and a routine built around your results.
       </p>
 
     </div>
@@ -875,6 +873,7 @@ video{
   </div>
 
 </section>
+
 
 <section id="access">
 
@@ -889,14 +888,16 @@ video{
     </h2>
 
     <p>
-      Choose your Luméra experience. You will create or sign
-      into your Luméra account before payment so your access
-      stays connected to your account.
+      Create or sign into your Luméra account first.
+      Your account is used to connect your Paystack
+      payment and Luméra access.
     </p>
 
   </div>
 
+
   <div class="access-grid">
+
 
     <!-- 3 SCAN -->
 
@@ -916,22 +917,39 @@ video{
       </div>
 
       <ul>
-        <li>3 skin-analysis scans</li>
-        <li>Skin score</li>
-        <li>Visible skin concerns</li>
-        <li>What your skin may need</li>
-        <li>Personalized guidance</li>
+
+        <li>
+          3 skin-analysis scans
+        </li>
+
+        <li>
+          AI skin score
+        </li>
+
+        <li>
+          Visible skin concerns
+        </li>
+
+        <li>
+          What your skin may need
+        </li>
+
+        <li>
+          Personalized guidance
+        </li>
+
       </ul>
 
       <button
         class="primary plan-button"
-        onclick="buyPlan('scan')"
-      >
+        onclick="buyPlan('scan')">
+
         Pay GH₵5 — Get 3 Scans
+
       </button>
 
       <div class="locked-note">
-        Create your Luméra account before payment.
+        Sign in or create your account first.
       </div>
 
     </div>
@@ -955,23 +973,36 @@ video{
       </div>
 
       <ul>
-        <li>Regular skin analysis</li>
-        <li>Personalized recommendations</li>
-        <li>Skincare routine guidance</li>
-        <li>Skin journey tracking</li>
-        <li>Progress check-ins</li>
+
+        <li>
+          Regular skin analysis
+        </li>
+
+        <li>
+          Personalized recommendations
+        </li>
+
+        <li>
+          Skincare routine guidance
+        </li>
+
+        <li>
+          Skin journey tracking
+        </li>
+
+        <li>
+          Progress check-ins
+        </li>
+
       </ul>
 
       <button
         class="primary plan-button"
-        onclick="buyPlan('standard')"
-      >
-        Choose Standard
-      </button>
+        onclick="buyPlan('standard')">
 
-      <div class="locked-note">
-        Create your Luméra account before payment.
-      </div>
+        Choose Standard
+
+      </button>
 
     </div>
 
@@ -994,23 +1025,36 @@ video{
       </div>
 
       <ul>
-        <li>Advanced skin analysis</li>
-        <li>Personalized recommendations</li>
-        <li>Progress comparisons</li>
-        <li>Long-term skin tracking</li>
-        <li>Premium Luméra features</li>
+
+        <li>
+          Advanced skin analysis
+        </li>
+
+        <li>
+          Personalized recommendations
+        </li>
+
+        <li>
+          Progress comparisons
+        </li>
+
+        <li>
+          Long-term skin tracking
+        </li>
+
+        <li>
+          Premium Luméra features
+        </li>
+
       </ul>
 
       <button
         class="primary plan-button"
-        onclick="buyPlan('pro')"
-      >
-        Choose Pro
-      </button>
+        onclick="buyPlan('pro')">
 
-      <div class="locked-note">
-        Create your Luméra account before payment.
-      </div>
+        Choose Pro
+
+      </button>
 
     </div>
 
@@ -1023,17 +1067,18 @@ video{
 
 <section
   id="scanner"
-  class="scanner-section"
->
+  class="scanner-section">
 
   <div class="scanner">
 
     <div
       id="scanCounter"
-      class="scan-counter"
-    >
-      Checking your scan balance…
+      class="scan-counter">
+
+      Your Luméra access will appear here.
+
     </div>
+
 
     <div class="scanner-header">
 
@@ -1048,20 +1093,22 @@ video{
 
       <div
         id="selectedPlan"
-        class="selected-plan"
-      >
-        3-Scan Pass
+        class="selected-plan">
+
+        Luméra AI Skin Analysis
+
       </div>
 
     </div>
+
 
     <div class="camera-frame">
 
       <video
         id="camera"
         autoplay
-        playsinline
-      ></video>
+        playsinline>
+      </video>
 
       <div class="face-guide"></div>
 
@@ -1069,78 +1116,106 @@ video{
 
     </div>
 
+
     <div class="scan-guidance">
 
       <div
         id="scanStatus"
-        class="scan-status"
-      >
+        class="scan-status">
+
         Camera ready
+
       </div>
 
       <div
         id="scanInstruction"
-        class="scan-instruction"
-      >
+        class="scan-instruction">
+
         Position your face inside the oval.
+
       </div>
 
+
       <div class="scan-progress">
+
         <div
           id="scanProgress"
-          class="scan-progress-bar"
-        ></div>
+          class="scan-progress-bar">
+        </div>
+
       </div>
+
 
       <div class="scan-actions">
 
         <button
           id="beginAnalysis"
           class="primary"
-          onclick="beginGuidedScan()"
-        >
+          onclick="beginGuidedScan()">
+
           Begin Scan
+
         </button>
 
         <button
           class="stop"
-          onclick="stopCamera()"
-        >
+          onclick="stopCamera()">
+
           Close Camera
+
         </button>
 
       </div>
 
+
       <div
         id="cameraError"
-        style="color:#d9b8ff;margin-top:15px;font-size:13px"
-      ></div>
+        style="
+          color:#d9b8ff;
+          margin-top:15px;
+          font-size:13px;
+        ">
+      </div>
 
     </div>
 
+
+    <!-- RESULTS -->
+
     <div
       id="result"
-      class="result"
-    >
+      class="result">
 
       <div class="result-title">
+
         Your Luméra Skin Snapshot
+
       </div>
+
 
       <div class="score-wrap">
 
         <div class="score">
 
           <div>
-            <strong id="scoreNumber">—</strong>
-            <small>/10</small>
+
+            <strong id="scoreNumber">
+              —
+            </strong>
+
+            <small>
+              /10
+            </small>
+
           </div>
 
         </div>
 
       </div>
 
+
       <div class="result-grid">
+
 
         <div class="result-box">
 
@@ -1149,10 +1224,11 @@ video{
           </h4>
 
           <p id="concerns">
-            Your AI analysis results will appear here.
+            Your AI analysis will appear here.
           </p>
 
         </div>
+
 
         <div class="result-box">
 
@@ -1166,6 +1242,7 @@ video{
 
         </div>
 
+
         <div class="result-box">
 
           <h4>
@@ -1173,10 +1250,23 @@ video{
           </h4>
 
           <p id="routine">
-            Your personalized skincare routine will appear here.
+            Your personalized routine will appear here.
           </p>
 
         </div>
+
+      </div>
+
+
+      <div class="recommendations">
+
+        <h4>
+          Product Recommendations
+        </h4>
+
+        <p id="recommendations">
+          Your recommended skincare products will appear here.
+        </p>
 
       </div>
 
@@ -1196,7 +1286,8 @@ video{
     </div>
 
     <h2 class="section-title">
-      Every skin story is <span>different.</span>
+      Every skin story is
+      <span>different.</span>
     </h2>
 
     <p>
@@ -1206,12 +1297,12 @@ video{
 
   </div>
 
+
   <div class="journey-image">
 
     <img
       src="lumera-journeys.png"
-      alt="Luméra skin journeys"
-    >
+      alt="Luméra skin journeys">
 
   </div>
 
@@ -1238,17 +1329,20 @@ video{
 
   </div>
 
+
   <div class="products-grid">
+
 
     <div class="product">
       <div class="product-symbol">✦</div>
       <h3>Anua</h3>
       <p>
-        Korean skincare focused on calming, hydration
-        and balanced-looking skin.
+        Korean skincare focused on calming,
+        hydration and balanced-looking skin.
       </p>
       <span class="product-tag">K-BEAUTY</span>
     </div>
+
 
     <div class="product">
       <div class="product-symbol">◇</div>
@@ -1260,6 +1354,7 @@ video{
       <span class="product-tag">SKIN TECHNOLOGY</span>
     </div>
 
+
     <div class="product">
       <div class="product-symbol">○</div>
       <h3>CeraVe</h3>
@@ -1269,6 +1364,7 @@ video{
       </p>
       <span class="product-tag">BARRIER CARE</span>
     </div>
+
 
     <div class="product">
       <div class="product-symbol">✧</div>
@@ -1280,6 +1376,7 @@ video{
       <span class="product-tag">DERM CARE</span>
     </div>
 
+
     <div class="product">
       <div class="product-symbol">∞</div>
       <h3>The Ordinary</h3>
@@ -1290,15 +1387,17 @@ video{
       <span class="product-tag">ACTIVE CARE</span>
     </div>
 
+
     <div class="product">
       <div class="product-symbol">✦</div>
       <h3>COSRX</h3>
       <p>
-        Korean skincare with popular options for
-        hydration, blemishes and skin texture.
+        Korean skincare with popular options
+        for hydration, blemishes and skin texture.
       </p>
       <span class="product-tag">K-BEAUTY</span>
     </div>
+
 
     <div class="product">
       <div class="product-symbol">◇</div>
@@ -1310,6 +1409,7 @@ video{
       <span class="product-tag">K-BEAUTY</span>
     </div>
 
+
     <div class="product">
       <div class="product-symbol">♢</div>
       <h3>Paula's Choice</h3>
@@ -1319,6 +1419,7 @@ video{
       </p>
       <span class="product-tag">TARGETED CARE</span>
     </div>
+
 
     <div class="product">
       <div class="product-symbol">✧</div>
@@ -1330,15 +1431,17 @@ video{
       <span class="product-tag">GENTLE CARE</span>
     </div>
 
+
     <div class="product">
       <div class="product-symbol">○</div>
       <h3>Eucerin</h3>
       <p>
-        Skincare solutions designed around hydration,
-        tone and other skin concerns.
+        Skincare solutions designed around
+        hydration, tone and other skin concerns.
       </p>
       <span class="product-tag">DERM CARE</span>
     </div>
+
 
     <div class="product">
       <div class="product-symbol">✦</div>
@@ -1349,6 +1452,7 @@ video{
       </p>
       <span class="product-tag">HYDRATION</span>
     </div>
+
 
     <div class="product">
       <div class="product-symbol">∞</div>
@@ -1374,7 +1478,8 @@ video{
     </div>
 
     <h2 class="section-title">
-      Start with <span>the simple things.</span>
+      Start with
+      <span>the simple things.</span>
     </h2>
 
     <p>
@@ -1384,7 +1489,9 @@ video{
 
   </div>
 
+
   <div class="care-grid">
+
 
     <div class="care-card">
 
@@ -1393,14 +1500,31 @@ video{
       </h3>
 
       <ul>
-        <li>Use a gentle cleanser.</li>
-        <li>Keep your skin moisturized.</li>
-        <li>Use a cool compress when soothing is needed.</li>
-        <li>Consider gentle aloe-based products if tolerated.</li>
-        <li>Use daily sun protection.</li>
+
+        <li>
+          Use a gentle cleanser.
+        </li>
+
+        <li>
+          Keep your skin moisturized.
+        </li>
+
+        <li>
+          Use a cool compress when soothing is needed.
+        </li>
+
+        <li>
+          Consider gentle aloe-based products if tolerated.
+        </li>
+
+        <li>
+          Use daily sun protection.
+        </li>
+
       </ul>
 
     </div>
+
 
     <div class="care-card">
 
@@ -1409,11 +1533,27 @@ video{
       </h3>
 
       <ul>
-        <li>Do not place ice directly on your skin.</li>
-        <li>Avoid harsh physical scrubs.</li>
-        <li>Avoid squeezing breakouts.</li>
-        <li>Don't introduce many new products at once.</li>
-        <li>Stop products that clearly irritate your skin.</li>
+
+        <li>
+          Do not place ice directly on your skin.
+        </li>
+
+        <li>
+          Avoid harsh physical scrubs.
+        </li>
+
+        <li>
+          Avoid squeezing breakouts.
+        </li>
+
+        <li>
+          Don't introduce many new products at once.
+        </li>
+
+        <li>
+          Stop products that clearly irritate your skin.
+        </li>
+
       </ul>
 
     </div>
@@ -1439,8 +1579,12 @@ video{
     your skin in a completely new way.
   </p>
 
-  <a href="#access" class="primary">
+  <a
+    href="#access"
+    class="primary">
+
     ✦ Choose My Experience
+
   </a>
 
 </section>
@@ -1469,92 +1613,11 @@ video{
 </footer>
 
 
-<!-- AUTH MODAL -->
-
-<div
-  id="authModal"
-  class="modal"
->
-
-  <div class="modal-box">
-
-    <button
-      class="modal-close"
-      onclick="closeAuth()"
-    >
-      ×
-    </button>
-
-    <h2 id="authTitle">
-      Sign in to Luméra
-    </h2>
-
-    <p id="authSubtitle">
-      Use your Luméra account so your payments
-      and scan credits stay connected.
-    </p>
-
-    <div
-      id="authNotice"
-      class="notice"
-    ></div>
-
-    <input
-      id="authEmail"
-      type="email"
-      placeholder="Email address"
-      autocomplete="email"
-    >
-
-    <input
-      id="authPassword"
-      type="password"
-      placeholder="Password"
-      autocomplete="current-password"
-    >
-
-    <button
-      id="authSubmit"
-      class="primary"
-      onclick="submitAuth()"
-    >
-      Sign in
-    </button>
-
-    <div class="auth-switch">
-
-      <span id="authSwitchText">
-        Don't have an account?
-      </span>
-
-      <button
-        onclick="toggleAuthMode()"
-        id="authSwitchButton"
-      >
-        Create account
-      </button>
-
-    </div>
-
-  </div>
-
-</div>
-
-
 <script>
 
-const SUPABASE_URL =
-  "https://zvlkrnsvykxnlukmnouf.supabase.co";
-
-const SUPABASE_PUBLISHABLE_KEY =
-  "sb_publishable_fVf5OZdzYB3HYfUoeEsOLQ_mbx4lBfo";
-
-const supabaseClient =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
-  );
-
+/* =========================================================
+   LUMÉRA CONFIGURATION
+========================================================= */
 
 const PAYSTACK_LINKS = {
 
@@ -1570,873 +1633,1146 @@ const PAYSTACK_LINKS = {
 };
 
 
-let authMode = "signin";
+/*
+  IMPORTANT:
+
+  Your OpenAI secret key is NOT placed here.
+
+  The browser calls:
+
+      /api/analyze-skin
+
+  Your Vercel API route uses OPENAI_API_KEY
+  from your Vercel environment variables.
+*/
+
+
+/* =========================================================
+   STATE
+========================================================= */
 
 let currentUser = null;
-
-let scanCredits = 0;
 
 let cameraStream = null;
 
 let scanRunning = false;
 
-
-/*
-  This remembers which plan the visitor clicked
-  while the account window is open.
-*/
-
-let pendingLumeraPlan = null;
+let pendingPlan = null;
 
 
-/* =========================
-   AUTH MODAL
-========================= */
+/* =========================================================
+   WAIT FOR CLERK
+========================================================= */
 
-function openAuth(mode = "signin"){
+async function waitForClerk(){
 
-  authMode = mode;
+  if(window.Clerk){
 
-  updateAuthModal();
+    await window.Clerk.load();
 
-  document
-    .getElementById("authModal")
-    .classList
-    .add("show");
-
-}
-
-
-function closeAuth(){
-
-  document
-    .getElementById("authModal")
-    .classList
-    .remove("show");
-
-}
-
-
-function toggleAuthMode(){
-
-  authMode =
-    authMode === "signin"
-      ? "signup"
-      : "signin";
-
-  updateAuthModal();
-
-}
-
-
-function updateAuthModal(){
-
-  const signup =
-    authMode === "signup";
-
-  document
-    .getElementById("authTitle")
-    .textContent =
-      signup
-        ? "Create your Luméra account"
-        : "Sign in to Luméra";
-
-
-  document
-    .getElementById("authSubtitle")
-    .textContent =
-      signup
-
-        ? "Create your account first. Your payment and Luméra access will stay connected to it."
-
-        : "Sign in to the Luméra account you already created.";
-
-
-  document
-    .getElementById("authSubmit")
-    .textContent =
-      signup
-        ? "Create account"
-        : "Sign in";
-
-
-  document
-    .getElementById("authSwitchText")
-    .textContent =
-      signup
-        ? "Already have an account?"
-        : "Don't have an account?";
-
-
-  document
-    .getElementById("authSwitchButton")
-    .textContent =
-      signup
-        ? "Sign in"
-        : "Create account";
-
-
-  document
-    .getElementById("authNotice")
-    .style
-    .display = "none";
-
-}
-
-
-function showAuthNotice(message){
-
-  const notice =
-    document.getElementById("authNotice");
-
-  notice.textContent = message;
-
-  notice.style.display = "block";
-
-}
-
-
-/* =========================
-   CREATE / SIGN IN
-========================= */
-
-async function submitAuth(){
-
-  const email =
-    document
-      .getElementById("authEmail")
-      .value
-      .trim()
-      .toLowerCase();
-
-
-  const password =
-    document
-      .getElementById("authPassword")
-      .value;
-
-
-  if(!email || !password){
-
-    showAuthNotice(
-      "Enter your email and password."
-    );
-
-    return;
+    return window.Clerk;
 
   }
 
+  return new Promise((resolve,reject)=>{
 
-  if(password.length < 6){
+    let attempts = 0;
 
-    showAuthNotice(
-      "Password must be at least 6 characters."
-    );
+    const timer = setInterval(async()=>{
 
-    return;
+      attempts++;
 
-  }
+      if(window.Clerk){
 
+        clearInterval(timer);
 
-  const button =
-    document.getElementById("authSubmit");
+        try{
 
+          await window.Clerk.load();
 
-  button.disabled = true;
+          resolve(window.Clerk);
 
-  button.textContent =
-    "Please wait…";
+        }catch(error){
 
-
-  try{
-
-    /*
-      CREATE ACCOUNT
-    */
-
-    if(authMode === "signup"){
-
-      const {
-        data,
-        error
-      } =
-        await supabaseClient.auth.signUp({
-
-          email: email,
-
-          password: password
-
-        });
-
-
-      if(error){
-
-        /*
-          If the email already exists,
-          tell the visitor to sign in instead.
-        */
-
-        if(
-          error.message &&
-          (
-            error.message
-              .toLowerCase()
-              .includes("already registered")
-            ||
-            error.message
-              .toLowerCase()
-              .includes("already exists")
-          )
-        ){
-
-          showAuthNotice(
-            "This email already has a Luméra account. Please sign in instead."
-          );
-
-          authMode = "signin";
-
-          updateAuthModal();
-
-          return;
-
-        }
-
-        throw error;
-
-      }
-
-
-      /*
-        Create the scan_usage row
-        for this account.
-      */
-
-      if(data.user){
-
-        const {
-          error: usageError
-        } =
-          await supabaseClient
-            .from("scan_usage")
-            .upsert(
-
-              {
-                user_id: data.user.id,
-                free_scans_used: 0
-              },
-
-              {
-                onConflict: "user_id"
-              }
-
-            );
-
-
-        if(usageError){
-
-          console.error(
-            "Scan usage setup error:",
-            usageError
-          );
+          reject(error);
 
         }
 
       }
 
+      if(attempts > 100){
 
-      /*
-        IMPORTANT:
-        The account has now been created.
+        clearInterval(timer);
 
-        We continue directly to the selected
-        Paystack checkout.
-
-        This means the requested experience is:
-
-        Create account
-        →
-        Account created
-        →
-        Paystack
-      */
-
-      if(pendingLumeraPlan){
-
-        const plan =
-          pendingLumeraPlan;
-
-        pendingLumeraPlan = null;
-
-        closeAuth();
-
-        openPaystackCheckout(plan);
-
-        return;
-
-      }
-
-
-      /*
-        If there was no selected plan,
-        just load the account.
-      */
-
-      if(data.session){
-
-        closeAuth();
-
-        await loadAccount();
-
-      }else{
-
-        /*
-          If Supabase email confirmation is enabled,
-          there may not be an immediate session.
-
-          The account still exists, so we keep
-          the user informed.
-        */
-
-        closeAuth();
-
-        alert(
-          "Your Luméra account has been created. Please check your email if confirmation is required, then sign in when you return."
+        reject(
+          new Error("Clerk could not be loaded.")
         );
 
       }
 
+    },100);
+
+  });
+
+}
+
+
+/* =========================================================
+   ACCOUNT UI
+========================================================= */
+
+function updateAccountUI(){
+
+  const button =
+    document.getElementById("accountButton");
+
+  const bar =
+    document.getElementById("accountBar");
+
+  const email =
+    document.getElementById("accountEmail");
+
+
+  if(currentUser){
+
+    button.textContent = "My Account";
+
+    bar.style.display = "block";
+
+    email.textContent =
+      currentUser.primaryEmailAddress?.emailAddress ||
+      currentUser.emailAddresses?.[0]?.emailAddress ||
+      "";
+
+  }else{
+
+    button.textContent = "Sign in";
+
+    bar.style.display = "none";
+
+  }
+
+}
+
+
+/* =========================================================
+   ACCOUNT BUTTON
+========================================================= */
+
+async function handleAccountButton(){
+
+  try{
+
+    const clerk = await waitForClerk();
+
+    if(clerk.user){
+
+      currentUser = clerk.user;
+
+      updateAccountUI();
+
+      document
+        .getElementById("accountBar")
+        .scrollIntoView({
+          behavior:"smooth"
+        });
+
+      return;
+
+    }
+
+    clerk.openSignIn();
+
+  }catch(error){
+
+    console.error(error);
+
+    alert(
+      "Luméra could not open the account system. Please refresh the page and try again."
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   SIGN UP
+========================================================= */
+
+async function openSignUp(){
+
+  try{
+
+    const clerk = await waitForClerk();
+
+    clerk.openSignUp();
+
+  }catch(error){
+
+    console.error(error);
+
+    alert(
+      "Unable to open account creation."
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   SIGN IN
+========================================================= */
+
+async function openSignIn(){
+
+  try{
+
+    const clerk = await waitForClerk();
+
+    clerk.openSignIn();
+
+  }catch(error){
+
+    console.error(error);
+
+    alert(
+      "Unable to open sign in."
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   SIGN OUT
+========================================================= */
+
+async function signOut(){
+
+  try{
+
+    const clerk = await waitForClerk();
+
+    await clerk.signOut();
+
+    currentUser = null;
+
+    updateAccountUI();
+
+    stopCamera();
+
+    document.getElementById("scanner").style.display =
+      "none";
+
+    alert("You have been signed out.");
+
+  }catch(error){
+
+    console.error(error);
+
+  }
+
+}
+
+
+/* =========================================================
+   GET USER EMAIL
+========================================================= */
+
+function getUserEmail(){
+
+  if(!currentUser){
+
+    return "";
+
+  }
+
+  return (
+    currentUser.primaryEmailAddress?.emailAddress ||
+    currentUser.emailAddresses?.[0]?.emailAddress ||
+    ""
+  );
+
+}
+
+
+/* =========================================================
+   BUY PLAN
+========================================================= */
+
+async function buyPlan(plan){
+
+  try{
+
+    const clerk = await waitForClerk();
+
+    currentUser = clerk.user;
+
+    updateAccountUI();
+
+
+    /*
+      If the user isn't signed in,
+      open Clerk signup.
+
+      After account creation they can
+      click the plan again.
+    */
+
+    if(!currentUser){
+
+      pendingPlan = plan;
+
+      clerk.openSignUp();
+
+      return;
+
+    }
+
+
+    const email = getUserEmail();
+
+
+    if(!email){
+
+      alert(
+        "Your Luméra account does not have an email address yet."
+      );
+
+      return;
+
+    }
+
+
+    let paymentURL = "";
+
+
+    if(plan === "scan"){
+
+      paymentURL =
+        PAYSTACK_LINKS.scan;
+
+    }
+
+    if(plan === "standard"){
+
+      paymentURL =
+        PAYSTACK_LINKS.standard;
+
+    }
+
+    if(plan === "pro"){
+
+      paymentURL =
+        PAYSTACK_LINKS.pro;
+
     }
 
 
     /*
-      SIGN IN
+      Pass the Clerk account email to Paystack.
+
+      The backend webhook can later use this email
+      to connect the payment to the Clerk account.
     */
 
-    else{
+    const separator =
+      paymentURL.includes("?")
+        ? "&"
+        : "?";
 
-      const {
-        data,
-        error
-      } =
-        await supabaseClient.auth.signInWithPassword({
-
-          email: email,
-
-          password: password
-
-        });
+    paymentURL +=
+      separator +
+      "email=" +
+      encodeURIComponent(email);
 
 
-      if(error){
+    window.location.href =
+      paymentURL;
 
-        throw error;
+  }catch(error){
 
-      }
+    console.error(error);
 
+    alert(
+      "Something went wrong. Please try again."
+    );
 
-      currentUser =
-        data.user;
+  }
 
-
-      closeAuth();
-
-      updateAccountUI();
-
-      await loadScanCredits();
+}
 
 
-      /*
-        Continue with the plan the user
-        originally selected.
-      */
+/* =========================================================
+   OPEN SCANNER
+========================================================= */
 
-      if(pendingLumeraPlan){
+async function openScanner(){
 
-        const plan =
-          pendingLumeraPlan;
+  try{
 
-        pendingLumeraPlan = null;
+    const clerk = await waitForClerk();
 
-        openPaystackCheckout(plan);
+    currentUser = clerk.user;
 
-      }
+    updateAccountUI();
+
+
+    if(!currentUser){
+
+      clerk.openSignIn();
+
+      return;
 
     }
+
+
+    document.getElementById("scanner").style.display =
+      "block";
+
+    document
+      .getElementById("scanner")
+      .scrollIntoView({
+        behavior:"smooth"
+      });
+
+
+    await startCamera();
+
+  }catch(error){
+
+    console.error(error);
+
+  }
+
+}
+
+
+/* =========================================================
+   CAMERA
+========================================================= */
+
+async function startCamera(){
+
+  const errorBox =
+    document.getElementById("cameraError");
+
+  errorBox.textContent = "";
+
+
+  try{
+
+    if(!navigator.mediaDevices ||
+       !navigator.mediaDevices.getUserMedia){
+
+      throw new Error(
+        "Camera is not supported by this browser."
+      );
+
+    }
+
+
+    cameraStream =
+      await navigator.mediaDevices.getUserMedia({
+
+        video:{
+          facingMode:{
+            ideal:"user"
+          },
+
+          width:{
+            ideal:720
+          },
+
+          height:{
+            ideal:720
+          }
+
+        },
+
+        audio:false
+
+      });
+
+
+    const video =
+      document.getElementById("camera");
+
+
+    video.srcObject =
+      cameraStream;
+
+
+    await video.play();
+
+
+    document
+      .getElementById("scanStatus")
+      .textContent =
+      "Camera ready";
+
+
+    document
+      .getElementById("scanInstruction")
+      .textContent =
+      "Position your face inside the oval.";
 
 
   }catch(error){
 
     console.error(error);
 
-    showAuthNotice(
-      error.message ||
-      "Something went wrong. Please try again."
-    );
 
-  }finally{
+    if(error.name === "NotAllowedError"){
 
-    button.disabled = false;
+      errorBox.textContent =
+        "Camera permission was denied. Allow camera access and try again.";
 
-    updateAuthModal();
+    }else{
+
+      errorBox.textContent =
+        "We couldn't access your camera. Check your browser permissions.";
+
+    }
 
   }
 
 }
 
 
-/* =========================
-   ACCOUNT
-========================= */
+/* =========================================================
+   GUIDED SCAN
+========================================================= */
 
-async function loadAccount(){
+async function beginGuidedScan(){
 
-  const {
-    data,
-    error
-  } =
-    await supabaseClient.auth.getUser();
-
-
-  if(error || !data.user){
-
-    currentUser = null;
-
-    updateAccountUI();
+  if(scanRunning){
 
     return;
 
   }
 
 
-  currentUser =
-    data.user;
+  const clerk =
+    await waitForClerk();
 
+  currentUser =
+    clerk.user;
 
   updateAccountUI();
 
-  await loadScanCredits();
+
+  if(!currentUser){
+
+    clerk.openSignIn();
+
+    return;
+
+  }
+
+
+  if(!cameraStream){
+
+    await startCamera();
+
+  }
+
+
+  if(!cameraStream){
+
+    return;
+
+  }
+
+
+  scanRunning = true;
+
+
+  const status =
+    document.getElementById("scanStatus");
+
+  const instruction =
+    document.getElementById("scanInstruction");
+
+  const progress =
+    document.getElementById("scanProgress");
+
+  const button =
+    document.getElementById("beginAnalysis");
+
+
+  button.style.display =
+    "none";
+
+
+  const steps = [
+
+    [
+      "Position your face",
+      "Place your face inside the oval and look directly at the camera."
+    ],
+
+    [
+      "Perfect your position",
+      "Move slightly to the LEFT."
+    ],
+
+    [
+      "Perfect your position",
+      "Now shift slightly to the RIGHT."
+    ],
+
+    [
+      "Check your angle",
+      "Tilt your face slightly UP."
+    ],
+
+    [
+      "Check your angle",
+      "Now tilt your face slightly DOWN."
+    ],
+
+    [
+      "Hold still",
+      "Keep your face centered and stay still."
+    ],
+
+    [
+      "Scan ready",
+      "Perfect. Hold still while Luméra captures your scan."
+    ]
+
+  ];
+
+
+  for(
+    let i = 0;
+    i < steps.length;
+    i++
+  ){
+
+    if(!scanRunning){
+
+      return;
+
+    }
+
+
+    status.textContent =
+      steps[i][0];
+
+    instruction.textContent =
+      steps[i][1];
+
+
+    progress.style.width =
+      ((i + 1) / steps.length * 100) +
+      "%";
+
+
+    await new Promise(
+      resolve =>
+        setTimeout(resolve,1800)
+    );
+
+  }
+
+
+  await completeScan();
 
 }
 
 
-function updateAccountUI(){
+/* =========================================================
+   CAPTURE FACE IMAGE
+========================================================= */
 
-  const button =
-    document.getElementById(
-      "accountButton"
+function captureFaceImage(){
+
+  const video =
+    document.getElementById("camera");
+
+
+  if(!video ||
+     !video.videoWidth ||
+     !video.videoHeight){
+
+    return null;
+
+  }
+
+
+  const canvas =
+    document.createElement("canvas");
+
+
+  /*
+    Keep image size reasonable so the
+    API request isn't unnecessarily huge.
+  */
+
+  const maxSize = 1024;
+
+
+  let width =
+    video.videoWidth;
+
+  let height =
+    video.videoHeight;
+
+
+  if(width > height){
+
+    if(width > maxSize){
+
+      height =
+        Math.round(
+          height * maxSize / width
+        );
+
+      width =
+        maxSize;
+
+    }
+
+  }else{
+
+    if(height > maxSize){
+
+      width =
+        Math.round(
+          width * maxSize / height
+        );
+
+      height =
+        maxSize;
+
+    }
+
+  }
+
+
+  canvas.width =
+    width;
+
+  canvas.height =
+    height;
+
+
+  const ctx =
+    canvas.getContext("2d");
+
+
+  /*
+    The video is mirrored visually,
+    but we don't need to mirror the AI image.
+  */
+
+  ctx.drawImage(
+    video,
+    0,
+    0,
+    width,
+    height
+  );
+
+
+  return canvas.toDataURL(
+    "image/jpeg",
+    0.85
+  );
+
+}
+
+
+/* =========================================================
+   OPENAI SKIN ANALYSIS
+========================================================= */
+
+async function analyzeSkin(image){
+
+  const response =
+    await fetch(
+      "/api/analyze-skin",
+      {
+        method:"POST",
+
+        headers:{
+          "Content-Type":
+            "application/json"
+        },
+
+        body:JSON.stringify({
+          image:image
+        })
+      }
     );
 
 
-  const bar =
-    document.getElementById(
-      "accountBar"
+  let data;
+
+
+  try{
+
+    data =
+      await response.json();
+
+  }catch(error){
+
+    throw new Error(
+      "The skin analysis server returned an invalid response."
     );
 
-
-  if(currentUser){
-
-    button.textContent =
-      "My Account";
+  }
 
 
-    bar.style.display =
+  if(!response.ok){
+
+    throw new Error(
+      data?.error ||
+      "Skin analysis failed."
+    );
+
+  }
+
+
+  return data;
+
+}
+
+
+/* =========================================================
+   COMPLETE SCAN
+========================================================= */
+
+async function completeScan(){
+
+  const status =
+    document.getElementById("scanStatus");
+
+  const instruction =
+    document.getElementById("scanInstruction");
+
+
+  status.textContent =
+    "Capturing your skin…";
+
+
+  instruction.textContent =
+    "Please keep still while Luméra captures your image.";
+
+
+  await new Promise(
+    resolve =>
+      setTimeout(resolve,800)
+  );
+
+
+  const image =
+    captureFaceImage();
+
+
+  if(!image){
+
+    status.textContent =
+      "Capture failed";
+
+    instruction.textContent =
+      "We couldn't capture the camera image. Please try again.";
+
+    document
+      .getElementById("beginAnalysis")
+      .style.display =
+      "inline-flex";
+
+    scanRunning = false;
+
+    return;
+
+  }
+
+
+  status.textContent =
+    "AI analyzing your skin…";
+
+
+  instruction.textContent =
+    "Luméra is examining visible skin characteristics.";
+
+
+  try{
+
+    /*
+      THIS IS THE OPENAI CONNECTION.
+
+      /api/analyze-skin receives the image.
+      Your Vercel backend then uses OPENAI_API_KEY.
+    */
+
+    const analysis =
+      await analyzeSkin(image);
+
+
+    displayAnalysis(analysis);
+
+
+    status.textContent =
+      "Analysis complete";
+
+
+    instruction.textContent =
+      "Your Luméra skin snapshot is ready.";
+
+
+    document
+      .getElementById("result")
+      .style.display =
       "block";
 
 
     document
-      .getElementById("accountEmail")
-      .textContent =
-        currentUser.email;
-
-  }else{
-
-    button.textContent =
-      "Sign in";
+      .getElementById("result")
+      .scrollIntoView({
+        behavior:"smooth",
+        block:"center"
+      });
 
 
-    bar.style.display =
-      "none";
+  }catch(error){
+
+    console.error(
+      "Luméra AI error:",
+      error
+    );
+
+
+    status.textContent =
+      "Analysis failed";
+
+
+    instruction.textContent =
+      error.message ||
+      "Luméra could not complete the AI analysis. Please try again.";
+
+
+    alert(
+      error.message ||
+      "Skin analysis failed. Please try again."
+    );
 
   }
+
+
+  stopCamera();
 
 }
 
 
-async function signOut(){
+/* =========================================================
+   DISPLAY AI RESULTS
+========================================================= */
 
-  await supabaseClient.auth.signOut();
+function displayAnalysis(analysis){
 
-  currentUser = null;
+  const score =
+    Number(analysis?.score);
 
-  scanCredits = 0;
 
-  updateAccountUI();
+  const safeScore =
+    Number.isFinite(score)
+      ? Math.max(0,Math.min(10,score))
+      : null;
+
 
   document
-    .getElementById("scanner")
-    .style
-    .display = "none";
-
-}
-
-
-/* =========================
-   SCAN CREDITS
-========================= */
-
-async function loadScanCredits(){
-
-  if(!currentUser){
-
-    return;
-
-  }
+    .getElementById("scoreNumber")
+    .textContent =
+    safeScore === null
+      ? "—"
+      : safeScore;
 
 
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("scan_usage")
-      .select("free_scans_used")
-      .eq(
-        "user_id",
-        currentUser.id
-      )
-      .maybeSingle();
+  const concerns =
+    Array.isArray(analysis?.concerns)
+      ? analysis.concerns
+      : [];
 
 
-  if(error){
-
-    console.error(error);
-
-    return;
-
-  }
+  const needs =
+    Array.isArray(analysis?.needs)
+      ? analysis.needs
+      : [];
 
 
-  scanCredits =
-    data
-      ? Number(
-          data.free_scans_used || 0
-        )
-      : 0;
+  const morning =
+    Array.isArray(analysis?.routine?.morning)
+      ? analysis.routine.morning
+      : [];
 
 
-  updateScanCounter();
+  const night =
+    Array.isArray(analysis?.routine?.night)
+      ? analysis.routine.night
+      : [];
 
-}
+
+  const recommendations =
+    Array.isArray(analysis?.recommendations)
+      ? analysis.recommendations
+      : [];
 
 
-function updateScanCounter(){
+  document
+    .getElementById("concerns")
+    .textContent =
+    concerns.length
+      ? concerns.join(" • ")
+      : "No specific visible concerns were returned.";
 
-  const element =
-    document.getElementById(
-      "scanCounter"
+
+  document
+    .getElementById("needs")
+    .textContent =
+    needs.length
+      ? needs.join(" • ")
+      : "No specific needs were returned.";
+
+
+  const routineText = [];
+
+
+  if(morning.length){
+
+    routineText.push(
+      "Morning: " +
+      morning.join(" → ")
     );
 
+  }
 
-  element.textContent =
-    `✨ ${scanCredits} scan${
-      scanCredits === 1
-        ? ""
-        : "s"
-    } available`;
+
+  if(night.length){
+
+    routineText.push(
+      "Night: " +
+      night.join(" → ")
+    );
+
+  }
+
+
+  document
+    .getElementById("routine")
+    .textContent =
+    routineText.length
+      ? routineText.join(" | ")
+      : "No routine was returned.";
+
+
+  document
+    .getElementById("recommendations")
+    .textContent =
+    recommendations.length
+      ? recommendations.join(" • ")
+      : "No product recommendations were returned.";
 
 }
 
 
-/* =========================
-   PLAN / PAYSTACK
-========================= */
+/* =========================================================
+   STOP CAMERA
+========================================================= */
 
-async function buyPlan(plan){
+function stopCamera(){
 
-  /*
-    Make sure this is a valid plan.
-  */
+  if(cameraStream){
 
-  if(!PAYSTACK_LINKS[plan]){
-
-    alert(
-      "Payment link not found."
-    );
-
-    return;
-
-  }
-
-
-  /*
-    If the visitor is NOT logged in:
-
-    remember the selected plan
-    and open CREATE ACCOUNT.
-  */
-
-  if(!currentUser){
-
-    pendingLumeraPlan =
-      plan;
-
-    openAuth("signup");
-
-    return;
-
-  }
-
-
-  /*
-    Existing user:
-    send them directly to Paystack.
-  */
-
-  openPaystackCheckout(plan);
-
-}
-
-
-function openPaystackCheckout(plan){
-
-  const link =
-    PAYSTACK_LINKS[plan];
-
-
-  if(!link){
-
-    alert(
-      "Payment link not found."
-    );
-
-    return;
-
-  }
-
-
-  /*
-    Pass the Luméra account email
-    into the checkout URL.
-
-    The Paystack webhook can then use
-    the payment email to identify the
-    Luméra account.
-  */
-
-  const email =
-    currentUser &&
-    currentUser.email
-      ? encodeURIComponent(
-          currentUser.email
-        )
-      : "";
-
-
-  const separator =
-    link.includes("?")
-      ? "&"
-      : "?";
-
-
-  const checkoutURL =
-    link +
-    separator +
-    "email=" +
-    email;
-
-
-  window.location.href =
-    checkoutURL;
-
-}
-
-
-/* =========================
-   SCANNER
-========================= */
-<script>
-async function completeScan() {
-  if (scanRunning) return;
-
-  const video = document.getElementById("camera");
-
-  if (!video || !video.videoWidth || !video.videoHeight) {
-    alert("Camera is not ready yet. Please wait a moment and try again.");
-    return;
-  }
-
-  scanRunning = true;
-
-  try {
-    // Show scanning message
-    const scoreNumber = document.getElementById("scoreNumber");
-    const concerns = document.getElementById("concerns");
-    const needs = document.getElementById("needs");
-    const routine = document.getElementById("routine");
-
-    if (scoreNumber) scoreNumber.textContent = "…";
-    if (concerns) concerns.textContent = "Analyzing your skin...";
-    if (needs) needs.textContent = "Please wait";
-    if (routine) routine.textContent = "Luméra AI is checking your scan...";
-
-    // Capture the face from the camera
-    const canvas = document.createElement("canvas");
-
-    const size = Math.min(video.videoWidth, video.videoHeight);
-
-    canvas.width = 720;
-    canvas.height = 720;
-
-    const ctx = canvas.getContext("2d");
-
-    const sx = (video.videoWidth - size) / 2;
-    const sy = (video.videoHeight - size) / 2;
-
-    ctx.drawImage(
-      video,
-      sx,
-      sy,
-      size,
-      size,
-      0,
-      0,
-      720,
-      720
-    );
-
-    // Convert image to JPEG
-    const image = canvas.toDataURL("image/jpeg", 0.82);
-
-    // Send image to our Vercel backend
-    const response = await fetch("/api/analyze", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        image: image
-      })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok || !data.success) {
-      throw new Error(
-        data.error || "Luméra could not analyze your scan."
+    cameraStream
+      .getTracks()
+      .forEach(
+        track =>
+          track.stop()
       );
-    }
 
-    const analysis = data.analysis;
+    cameraStream = null;
 
-    // Make sure the score is valid
-    const score = Math.max(
-      0,
-      Math.min(10, Number(analysis.score) || 0)
-    );
-
-    // Display score
-    if (scoreNumber) {
-      scoreNumber.textContent = score + "/10";
-    }
-
-    // Display concerns
-    if (concerns) {
-      concerns.textContent =
-        Array.isArray(analysis.concerns) &&
-        analysis.concerns.length
-          ? analysis.concerns.join(" • ")
-          : "No major visible concerns detected.";
-    }
-
-    // Display what the skin needs
-    if (needs) {
-      needs.textContent =
-        Array.isArray(analysis.needs) &&
-        analysis.needs.length
-          ? analysis.needs.join(" • ")
-          : "Your skin may benefit from a simple, consistent routine.";
-    }
-
-    // Display routine + recommendations
-    if (routine) {
-      const morning =
-        Array.isArray(analysis.morningRoutine) &&
-        analysis.morningRoutine.length
-          ? analysis.morningRoutine.join(" → ")
-          : "Gentle cleanser → moisturizer → sunscreen";
-
-      const evening =
-        Array.isArray(analysis.eveningRoutine) &&
-        analysis.eveningRoutine.length
-          ? analysis.eveningRoutine.join(" → ")
-          : "Gentle cleanser → moisturizer";
-
-      const recommendations =
-        Array.isArray(analysis.recommendations) &&
-        analysis.recommendations.length
-          ? analysis.recommendations.join(" • ")
-          : "No specific products recommended yet.";
-
-      routine.textContent =
-        "MORNING:\n" +
-        morning +
-        "\n\nEVENING:\n" +
-        evening +
-        "\n\nPRODUCTS:\n" +
-        recommendations;
-    }
-
-    // Only use a scan AFTER successful analysis
-    scanCredits = Math.max(0, scanCredits - 1);
-
-    // Save remaining scan balance
-    if (currentUser) {
-      const { error } = await supabase
-        .from("scan_usage")
-        .update({
-          free_scans_used: scanCredits
-        })
-        .eq("user_id", currentUser.id);
-
-      if (error) {
-        console.error("Could not update scan balance:", error);
-      }
-    }
-
-    // Stop camera after successful scan
-    if (typeof stopCamera === "function") {
-      stopCamera();
-    }
-
-    // Show result section if your page has one
-    const scanner = document.getElementById("scanner");
-    const result = document.getElementById("result");
-
-    if (scanner) scanner.style.display = "none";
-    if (result) result.style.display = "block";
-
-    alert(
-      "✨ Your Luméra skin analysis is ready!"
-    );
-
-  } catch (error) {
-    console.error("Luméra scan error:", error);
-
-    alert(
-      "Luméra could not complete the analysis.\n\n" +
-      "Please check your internet connection and try again."
-    );
-
-    const concerns = document.getElementById("concerns");
-    const needs = document.getElementById("needs");
-    const routine = document.getElementById("routine");
-
-    if (concerns) concerns.textContent = "Analysis failed.";
-    if (needs) needs.textContent = "Please try the scan again.";
-    if (routine) routine.textContent = "";
-
-  } finally {
-    scanRunning = false;
   }
+
+
+  const video =
+    document.getElementById("camera");
+
+
+  if(video){
+
+    video.srcObject =
+      null;
+
+  }
+
+
+  const button =
+    document.getElementById("beginAnalysis");
+
+
+  if(button){
+
+    button.style.display =
+      "inline-flex";
+
+  }
+
+
+  scanRunning =
+    false;
+
 }
-</script>
+
+
+/* =========================================================
+   CLERK INITIALIZATION
+========================================================= */
+
+async function initLumera(){
+
+  try{
+
+    const clerk =
+      await waitForClerk();
+
+
+    currentUser =
+      clerk.user;
+
+
+    updateAccountUI();
+
+
+    /*
+      If Clerk tells us the user changes,
+      immediately update Luméra.
+    */
+
+    clerk.addListener(
+      ({user}) => {
+
+        currentUser =
+          user || null;
+
+        updateAccountUI();
+
+      }
+    );
+
+
+    /*
+      If the user created an account
+      before clicking a payment button,
+      remember the selected plan visually.
+    */
+
+    if(currentUser &&
+       pending
