@@ -1,196 +1,225 @@
-// api/account.js
-// Secure Luméra account lookup
-// Clerk verifies the logged-in user.
-// Supabase stores the Luméra payment/scan entitlement.
+import { createClerkClient } from "@clerk/backend";
 
-const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY;
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY;
-
-function send(res, status, data) {
-  res.status(status).json(data);
-}
-
-function getBearerToken(req) {
-  const header = req.headers.authorization || "";
-
-  if (!header.startsWith("Bearer ")) {
-    return null;
-  }
-
-  return header.slice(7).trim();
-}
-
-function decodeJwtPayload(token) {
-  try {
-    const parts = token.split(".");
-
-    if (parts.length !== 3) {
-      return null;
-    }
-
-    const payload = parts[1];
-
-    const normalized = payload
-      .replace(/-/g, "+")
-      .replace(/_/g, "/");
-
-    const padded =
-      normalized + "=".repeat((4 - normalized.length % 4) % 4);
-
-    return JSON.parse(
-      Buffer.from(padded, "base64").toString("utf8")
-    );
-  } catch {
-    return null;
-  }
-}
-
-async function getClerkUser(sessionToken) {
-  const payload = decodeJwtPayload(sessionToken);
-
-  if (!payload || !payload.sid) {
-    throw new Error("Invalid Clerk session token.");
-  }
-
-  const sessionResponse = await fetch(
-    `https://api.clerk.com/v1/sessions/${encodeURIComponent(payload.sid)}`,
-    {
-      headers: {
-        Authorization: `Bearer ${CLERK_SECRET_KEY}`,
-        "Content-Type": "application/json"
-      }
-    }
-  );
-
-  if (!sessionResponse.ok) {
-    throw new Error("Clerk session could not be verified.");
-  }
-
-  const session = await sessionResponse.json();
-
-  if (session.status !== "active") {
-    throw new Error("Clerk session is not active.");
-  }
-
-  if (!session.user_id) {
-    throw new Error("No Clerk user is attached to this session.");
-  }
-
-  const userResponse = await fetch(
-    `https://api.clerk.com/v1/users/${encodeURIComponent(session.user_id)}`,
-    {
-      headers: {
-        Authorization: `Bearer ${CLERK_SECRET_KEY}`,
-        "Content-Type": "application/json"
-      }
-    }
-  );
-
-  if (!userResponse.ok) {
-    throw new Error("Clerk user could not be retrieved.");
-  }
-
-  const user = await userResponse.json();
-
-  const emailAddresses = user.email_addresses || [];
-
-  const primary =
-    emailAddresses.find(
-      (item) =>
-        item.id === user.primary_email_address_id
-    ) || emailAddresses[0];
-
-  const email = primary?.email_address || "";
-
-  if (!email) {
-    throw new Error("No email address is attached to this account.");
-  }
-
-  return {
-    userId: user.id,
-    email: email.toLowerCase().trim()
-  };
-}
-
-async function getLumeraAccount(email) {
-  const response = await fetch(
-    `${SUPABASE_URL}/rest/v1/lumera_accounts?email=eq.${encodeURIComponent(email)}&select=email,scan_credits,plan,plan_expires_at,last_payment_reference,created_at,updated_at`,
-    {
-      headers: {
-        apikey: SUPABASE_SECRET_KEY,
-        Authorization: `Bearer ${SUPABASE_SECRET_KEY}`,
-        "Content-Type": "application/json"
-      }
-    }
-  );
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Supabase account lookup failed: ${errorText}`
-    );
-  }
-
-  const rows = await response.json();
-
-  if (!rows.length) {
-    return null;
-  }
-
-  return rows[0];
-}
+const clerkClient = createClerkClient({
+  secretKey: process.env.CLERK_SECRET_KEY,
+  publishableKey: process.env.CLERK_PUBLISHABLE_KEY
+});
 
 export default async function handler(req, res) {
-  if (req.method !== "GET") {
-    return send(res, 405, {
-      error: "Method not allowed."
-    });
-  }
-
-  if (
-    !CLERK_SECRET_KEY ||
-    !SUPABASE_URL ||
-    !SUPABASE_SECRET_KEY
-  ) {
-    return send(res, 500, {
-      error: "Server environment variables are missing."
-    });
-  }
-
   try {
-    const sessionToken = getBearerToken(req);
+    // =====================================================
+    // VERIFY CLERK SESSION
+    // =====================================================
 
-    if (!sessionToken) {
-      return send(res, 401, {
+    const { isAuthenticated, toAuth } =
+      await clerkClient.authenticateRequest(req, {
+        authorizedParties: [
+          "https://lum-ra.vercel.app",
+          "https://lum-d7ipe8e2b-geraldmings.vercel.app"
+        ]
+      });
+
+    if (!isAuthenticated) {
+      return res.status(401).json({
         error: "You must be signed in."
       });
     }
 
-    const clerkUser = await getClerkUser(sessionToken);
+    const auth = toAuth();
+    const userId = auth.userId;
 
-    const account = await getLumeraAccount(
-      clerkUser.email
-    );
+    if (!userId) {
+      return res.status(401).json({
+        error: "Clerk user not found."
+      });
+    }
 
-    return send(res, 200, {
-      authenticated: true,
-      email: clerkUser.email,
-      clerk_user_id: clerkUser.userId,
-      account: account || {
-        email: clerkUser.email,
-        scan_credits: 0,
-        plan: null,
-        plan_expires_at: null,
-        last_payment_reference: null
+    // =====================================================
+    // GET CLERK USER
+    // =====================================================
+
+    const user = await clerkClient.users.getUser(userId);
+
+    const email =
+      user.primaryEmailAddress?.emailAddress
+        ?.trim()
+        ?.toLowerCase();
+
+    if (!email) {
+      return res.status(400).json({
+        error: "No email address found for this account."
+      });
+    }
+
+    // =====================================================
+    // GET ACCOUNT
+    // =====================================================
+
+    if (req.method === "GET") {
+      const response = await fetch(
+        `${process.env.SUPABASE_URL}/rest/v1/lumera_accounts?email=eq.${encodeURIComponent(
+          email
+        )}&select=email,scan_credits,plan,plan_expires_at,last_payment_reference`,
+        {
+          method: "GET",
+          headers: {
+            apikey: process.env.SUPABASE_SECRET_KEY,
+            Authorization:
+              `Bearer ${process.env.SUPABASE_SECRET_KEY}`
+          }
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.text();
+
+        console.error(
+          "Luméra account lookup error:",
+          error
+        );
+
+        return res.status(500).json({
+          error: "Could not load Luméra account."
+        });
       }
+
+      const accounts = await response.json();
+
+      if (accounts.length === 0) {
+        return res.status(200).json({
+          email,
+          scan_credits: 0,
+          plan: null,
+          plan_expires_at: null,
+          last_payment_reference: null
+        });
+      }
+
+      return res.status(200).json(accounts[0]);
+    }
+
+    // =====================================================
+    // USE ONE SCAN
+    // =====================================================
+
+    if (req.method === "POST") {
+      const accountResponse = await fetch(
+        `${process.env.SUPABASE_URL}/rest/v1/lumera_accounts?email=eq.${encodeURIComponent(
+          email
+        )}&select=email,scan_credits,plan,plan_expires_at`,
+        {
+          method: "GET",
+          headers: {
+            apikey: process.env.SUPABASE_SECRET_KEY,
+            Authorization:
+              `Bearer ${process.env.SUPABASE_SECRET_KEY}`
+          }
+        }
+      );
+
+      if (!accountResponse.ok) {
+        const error = await accountResponse.text();
+
+        console.error(
+          "Luméra access lookup error:",
+          error
+        );
+
+        return res.status(500).json({
+          error: "Could not check Luméra access."
+        });
+      }
+
+      const accounts = await accountResponse.json();
+
+      if (accounts.length === 0) {
+        return res.status(403).json({
+          error: "No Luméra access found."
+        });
+      }
+
+      const account = accounts[0];
+
+      const credits = Number(
+        account.scan_credits || 0
+      );
+
+      const planActive =
+        account.plan &&
+        account.plan_expires_at &&
+        new Date(account.plan_expires_at) > new Date();
+
+      // Standard / Pro
+      if (planActive) {
+        return res.status(200).json({
+          allowed: true,
+          scan_credits: credits,
+          plan: account.plan
+        });
+      }
+
+      // 3-scan pass
+      if (credits <= 0) {
+        return res.status(403).json({
+          error: "No scans remaining.",
+          scan_credits: 0,
+          plan: null
+        });
+      }
+
+      // Deduct one scan
+      const updateResponse = await fetch(
+        `${process.env.SUPABASE_URL}/rest/v1/lumera_accounts?email=eq.${encodeURIComponent(
+          email
+        )}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: process.env.SUPABASE_SECRET_KEY,
+            Authorization:
+              `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
+            Prefer: "return=representation"
+          },
+          body: JSON.stringify({
+            scan_credits: credits - 1,
+            updated_at: new Date().toISOString()
+          })
+        }
+      );
+
+      if (!updateResponse.ok) {
+        const error = await updateResponse.text();
+
+        console.error(
+          "Scan credit update error:",
+          error
+        );
+
+        return res.status(500).json({
+          error: "Could not use scan."
+        });
+      }
+
+      return res.status(200).json({
+        allowed: true,
+        scan_credits: credits - 1,
+        plan: null
+      });
+    }
+
+    return res.status(405).json({
+      error: "Method not allowed"
     });
 
   } catch (error) {
-    console.error("Luméra account error:", error);
+    console.error(
+      "Luméra account API error:",
+      error
+    );
 
-    return send(res, 401, {
-      error: error.message || "Authentication failed."
+    return res.status(500).json({
+      error: "Luméra account request failed."
     });
   }
-    }
+          }
