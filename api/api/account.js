@@ -1,225 +1,212 @@
 import { createClerkClient } from "@clerk/backend";
 
-const clerkClient = createClerkClient({
+const clerk = createClerkClient({
   secretKey: process.env.CLERK_SECRET_KEY,
   publishableKey: process.env.CLERK_PUBLISHABLE_KEY
 });
 
-export default async function handler(req, res) {
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY;
+const AUTHORIZED_PARTY = "https://lum-ra.vercel.app";
+
+async function authenticate(req) {
+  const result = await clerk.authenticateRequest(req, {
+    authorizedParties: [AUTHORIZED_PARTY]
+  });
+
+  if (!result.isAuthenticated) {
+    throw new Error("Unauthorized");
+  }
+
+  return result.toAuth();
+}
+
+async function supabase(path, options = {}) {
+  if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) {
+    throw new Error("Supabase is not configured.");
+  }
+
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/${path}`,
+    {
+      ...options,
+      headers: {
+        apikey: SUPABASE_SECRET_KEY,
+        Authorization: `Bearer ${SUPABASE_SECRET_KEY}`,
+        "Content-Type": "application/json",
+        ...(options.headers || {})
+      }
+    }
+  );
+
+  const text = await response.text();
+
+  let data = null;
+
   try {
-    // =====================================================
-    // VERIFY CLERK SESSION
-    // =====================================================
+    data = text ? JSON.parse(text) : null;
+  } catch {}
 
-    const { isAuthenticated, toAuth } =
-      await clerkClient.authenticateRequest(req, {
-        authorizedParties: [
-  "https://lum-ra.vercel.app"
-]
-  
-      });
+  if (!response.ok) {
+    throw new Error(
+      data?.message ||
+      data?.error ||
+      text ||
+      "Supabase request failed"
+    );
+  }
 
-    if (!isAuthenticated) {
-      return res.status(401).json({
-        error: "You must be signed in."
-      });
-    }
+  return data;
+}
 
-    const auth = toAuth();
-    const userId = auth.userId;
+function chooseCurrentPlan(rows) {
+  const now = Date.now();
 
-    if (!userId) {
-      return res.status(401).json({
-        error: "Clerk user not found."
-      });
-    }
+  const activeSubscriptions = rows.filter(row =>
+    (row.plan === "standard" || row.plan === "pro") &&
+    row.status === "active" &&
+    row.expires_at &&
+    new Date(row.expires_at).getTime() > now
+  );
 
-    // =====================================================
-    // GET CLERK USER
-    // =====================================================
+  if (activeSubscriptions.length) {
+    activeSubscriptions.sort(
+      (a, b) =>
+        new Date(b.expires_at) -
+        new Date(a.expires_at)
+    );
 
-    const user = await clerkClient.users.getUser(userId);
+    return activeSubscriptions[0];
+  }
 
-    const email =
-      user.primaryEmailAddress?.emailAddress
-        ?.trim()
-        ?.toLowerCase();
+  const scanRows = rows.filter(row =>
+    row.plan === "3_scan_pass" &&
+    row.status === "active" &&
+    Number(row.scan_remaining || 0) > 0
+  );
+
+  scanRows.sort(
+    (a, b) =>
+      Number(b.scan_remaining || 0) -
+      Number(a.scan_remaining || 0)
+  );
+
+  return scanRows[0] || null;
+}
+
+export default async function handler(req, res) {
+  if (req.method !== "GET") {
+    return res
+      .status(405)
+      .json({ error: "Method not allowed" });
+  }
+
+  try {
+    const auth = await authenticate(req);
+
+    const user = await clerk.users.getUser(auth.userId);
+
+    const email = (
+      user.primaryEmailAddress?.emailAddress ||
+      user.emailAddresses?.[0]?.emailAddress ||
+      ""
+    )
+      .trim()
+      .toLowerCase();
 
     if (!email) {
-      return res.status(400).json({
-        error: "No email address found for this account."
-      });
+      return res
+        .status(400)
+        .json({ error: "No verified email on account" });
     }
 
-    // =====================================================
-    // GET ACCOUNT
-    // =====================================================
+    const rows = await supabase(
+      `lumera_entitlements?email=eq.${encodeURIComponent(
+        email
+      )}&select=id,email,plan,scan,scan_remaining,status,transaction_reference,expires_at`
+    );
 
-    if (req.method === "GET") {
-      const response = await fetch(
-        `${process.env.SUPABASE_URL}/rest/v1/lumera_accounts?email=eq.${encodeURIComponent(
-          email
-        )}&select=email,scan_credits,plan,plan_expires_at,last_payment_reference`,
-        {
-          method: "GET",
-          headers: {
-            apikey: process.env.SUPABASE_SECRET_KEY,
-            Authorization:
-              `Bearer ${process.env.SUPABASE_SECRET_KEY}`
-          }
-        }
+    const entitlements = Array.isArray(rows)
+      ? rows
+      : [];
+
+    const current = chooseCurrentPlan(entitlements);
+
+    const scanCredits = entitlements
+      .filter(
+        row =>
+          row.plan === "3_scan_pass" &&
+          row.status === "active"
+      )
+      .reduce(
+        (total, row) =>
+          total +
+          Number(row.scan_remaining || 0),
+        0
       );
 
-      if (!response.ok) {
-        const error = await response.text();
+    const activeSubscription =
+      !!current &&
+      (current.plan === "standard" ||
+        current.plan === "pro") &&
+      current.status === "active" &&
+      current.expires_at &&
+      new Date(current.expires_at).getTime() >
+        Date.now();
 
-        console.error(
-          "Luméra account lookup error:",
-          error
-        );
+    return res.status(200).json({
+      email,
 
-        return res.status(500).json({
-          error: "Could not load Luméra account."
-        });
-      }
+      scan_credits: scanCredits,
 
-      const accounts = await response.json();
+      plan: current?.plan || null,
 
-      if (accounts.length === 0) {
-        return res.status(200).json({
-          email,
-          scan_credits: 0,
-          plan: null,
-          plan_expires_at: null,
-          last_payment_reference: null
-        });
-      }
+      status: current?.status || null,
 
-      return res.status(200).json(accounts[0]);
-    }
+      plan_expires_at:
+        current?.expires_at || null,
 
-    // =====================================================
-    // USE ONE SCAN
-    // =====================================================
+      active_subscription:
+        activeSubscription,
 
-    if (req.method === "POST") {
-      const accountResponse = await fetch(
-        `${process.env.SUPABASE_URL}/rest/v1/lumera_accounts?email=eq.${encodeURIComponent(
-          email
-        )}&select=email,scan_credits,plan,plan_expires_at`,
-        {
-          method: "GET",
-          headers: {
-            apikey: process.env.SUPABASE_SECRET_KEY,
-            Authorization:
-              `Bearer ${process.env.SUPABASE_SECRET_KEY}`
-          }
-        }
-      );
+      transaction_reference:
+        current?.transaction_reference || null,
 
-      if (!accountResponse.ok) {
-        const error = await accountResponse.text();
+      entitlements: entitlements.map(row => ({
+        id: row.id,
 
-        console.error(
-          "Luméra access lookup error:",
-          error
-        );
+        plan: row.plan,
 
-        return res.status(500).json({
-          error: "Could not check Luméra access."
-        });
-      }
+        scan: Number(row.scan || 0),
 
-      const accounts = await accountResponse.json();
+        scan_remaining:
+          Number(row.scan_remaining || 0),
 
-      if (accounts.length === 0) {
-        return res.status(403).json({
-          error: "No Luméra access found."
-        });
-      }
+        status: row.status,
 
-      const account = accounts[0];
+        transaction_reference:
+          row.transaction_reference,
 
-      const credits = Number(
-        account.scan_credits || 0
-      );
-
-      const planActive =
-        account.plan &&
-        account.plan_expires_at &&
-        new Date(account.plan_expires_at) > new Date();
-
-      // Standard / Pro
-      if (planActive) {
-        return res.status(200).json({
-          allowed: true,
-          scan_credits: credits,
-          plan: account.plan
-        });
-      }
-
-      // 3-scan pass
-      if (credits <= 0) {
-        return res.status(403).json({
-          error: "No scans remaining.",
-          scan_credits: 0,
-          plan: null
-        });
-      }
-
-      // Deduct one scan
-      const updateResponse = await fetch(
-        `${process.env.SUPABASE_URL}/rest/v1/lumera_accounts?email=eq.${encodeURIComponent(
-          email
-        )}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: process.env.SUPABASE_SECRET_KEY,
-            Authorization:
-              `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
-            Prefer: "return=representation"
-          },
-          body: JSON.stringify({
-            scan_credits: credits - 1,
-            updated_at: new Date().toISOString()
-          })
-        }
-      );
-
-      if (!updateResponse.ok) {
-        const error = await updateResponse.text();
-
-        console.error(
-          "Scan credit update error:",
-          error
-        );
-
-        return res.status(500).json({
-          error: "Could not use scan."
-        });
-      }
-
-      return res.status(200).json({
-        allowed: true,
-        scan_credits: credits - 1,
-        plan: null
-      });
-    }
-
-    return res.status(405).json({
-      error: "Method not allowed"
+        expires_at:
+          row.expires_at
+      }))
     });
-
   } catch (error) {
     console.error(
-      "Luméra account API error:",
+      "Luméra account error:",
       error
     );
 
-    return res.status(500).json({
-      error: "Luméra account request failed."
-    });
+    return res
+      .status(
+        error.message === "Unauthorized"
+          ? 401
+          : 500
+      )
+      .json({
+        error:
+          error.message ||
+          "Account lookup failed"
+      });
   }
-          }
+}
