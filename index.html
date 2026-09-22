@@ -787,6 +787,7 @@ video{
     <a href="#about">About</a>
     <a href="#products">Products</a>
     <a href="#access">Access</a>
+
     <button
       class="nav-account"
       id="accountButton"
@@ -797,6 +798,7 @@ video{
 </nav>
 
 <div id="accountBar" class="account-bar">
+
   <span id="accountEmail"></span>
 
   <button
@@ -808,11 +810,13 @@ video{
   <button onclick="signOut()">
     Sign out
   </button>
+
 </div>
 
 <header class="hero">
 
   <div>
+
     <div class="eyebrow">
       SKINCARE INTELLIGENCE
     </div>
@@ -829,6 +833,7 @@ video{
     </p>
 
     <div class="hero-buttons">
+
       <a href="#access" class="primary">
         ✦ Start My Skin Journey
       </a>
@@ -836,13 +841,17 @@ video{
       <a href="#about" class="secondary">
         Discover Luméra
       </a>
+
     </div>
+
   </div>
 
   <div class="hero-image">
+
     <img
       src="lumera-beauty.png"
       alt="Luméra skincare">
+
   </div>
 
 </header>
@@ -870,6 +879,7 @@ video{
   <div class="access-grid">
 
     <div class="access-card">
+
       <div class="access-icon">01</div>
 
       <h3>Scan</h3>
@@ -878,9 +888,11 @@ video{
         Use your phone camera and follow Luméra's
         positioning guidance.
       </p>
+
     </div>
 
     <div class="access-card">
+
       <div class="access-icon">02</div>
 
       <h3>Understand</h3>
@@ -889,9 +901,11 @@ video{
         Receive an AI-powered view of visible skin
         characteristics and concerns.
       </p>
+
     </div>
 
     <div class="access-card">
+
       <div class="access-icon">03</div>
 
       <h3>Personalize</h3>
@@ -900,6 +914,7 @@ video{
         Get skincare guidance, product recommendations
         and a routine built around your results.
       </p>
+
     </div>
 
   </div>
@@ -1075,10 +1090,12 @@ video{
       </div>
 
       <div class="scan-progress">
+
         <div
           id="scanProgress"
           class="scan-progress-bar">
         </div>
+
       </div>
 
       <div class="scan-actions">
@@ -1116,8 +1133,11 @@ video{
         <div class="score">
 
           <div>
+
             <strong id="scoreNumber">—</strong>
+
             <small>/10</small>
+
           </div>
 
         </div>
@@ -1517,11 +1537,22 @@ function getPendingPlan(){
 }
 
 function setPendingPlan(plan){
+
   if(plan){
-    localStorage.setItem("lumera_pending_plan",plan);
+
+    localStorage.setItem(
+      "lumera_pending_plan",
+      plan
+    );
+
   }else{
-    localStorage.removeItem("lumera_pending_plan");
+
+    localStorage.removeItem(
+      "lumera_pending_plan"
+    );
+
   }
+
 }
 
 
@@ -1550,7 +1581,9 @@ async function waitForClerkScripts(){
     window.Clerk &&
     window.__internal_ClerkUICtor
   ){
+
     return;
+
   }
 
   await new Promise((resolve,reject)=>{
@@ -1558,7 +1591,9 @@ async function waitForClerkScripts(){
     const timeout=setTimeout(
       ()=>{
         reject(
-          new Error("Clerk scripts did not load.")
+          new Error(
+            "Clerk scripts did not load."
+          )
         );
       },
       15000
@@ -1576,7 +1611,10 @@ async function waitForClerkScripts(){
 
       }else{
 
-        setTimeout(check,50);
+        setTimeout(
+          check,
+          50
+        );
 
       }
 
@@ -1599,11 +1637,15 @@ async function ensureClerk(){
     clerkReady &&
     window.Clerk
   ){
+
     return window.Clerk;
+
   }
 
   if(clerkPromise){
+
     return clerkPromise;
+
   }
 
   clerkPromise=(async()=>{
@@ -1611,22 +1653,28 @@ async function ensureClerk(){
     await waitForClerkScripts();
 
     if(!window.Clerk){
+
       throw new Error(
         "ClerkJS did not load."
       );
+
     }
 
     if(!window.__internal_ClerkUICtor){
+
       throw new Error(
         "Clerk UI did not load."
       );
+
     }
 
     await window.Clerk.load({
+
       ui:{
         ClerkUI:
           window.__internal_ClerkUICtor
       }
+
     });
 
     clerkReady=true;
@@ -1639,7 +1687,8 @@ async function ensureClerk(){
     window.Clerk.addListener(
       ({user})=>{
 
-        currentUser=user || null;
+        currentUser=
+          user || null;
 
         updateAccountUI();
 
@@ -1688,7 +1737,9 @@ function updateAccountUI(){
     );
 
   if(!button){
+
     return;
+
   }
 
   if(currentUser){
@@ -1697,13 +1748,17 @@ function updateAccountUI(){
       "My Account";
 
     if(bar){
+
       bar.style.display=
         "block";
+
     }
 
     if(emailEl){
+
       emailEl.textContent=
         getUserEmail();
+
     }
 
   }else{
@@ -1712,8 +1767,10 @@ function updateAccountUI(){
       "Sign in";
 
     if(bar){
+
       bar.style.display=
         "none";
+
     }
 
   }
@@ -1736,7 +1793,9 @@ async function openAuth(
       await ensureClerk();
 
     if(plan){
+
       setPendingPlan(plan);
+
     }
 
     const redirectUrl=
@@ -1782,21 +1841,30 @@ async function openAuth(
         elements:{
 
           card:{
-            background:"#100819",
+
+            background:
+              "#100819",
+
             border:
               "1px solid rgba(178,111,255,.27)",
+
             boxShadow:
               "0 30px 100px rgba(0,0,0,.5)"
+
           },
 
           headerTitle:{
+
             fontFamily:
               "Playfair Display, serif"
+
           },
 
           formButtonPrimary:{
+
             background:
               "linear-gradient(135deg,#7630f4,#b76dff)"
+
           }
 
         }
@@ -1853,6 +1921,7 @@ async function continueToPaystack(plan){
     );
 
     return;
+
   }
 
   const email=
@@ -1865,6 +1934,7 @@ async function continueToPaystack(plan){
     );
 
     return;
+
   }
 
   setPendingPlan(null);
@@ -1876,12 +1946,6 @@ async function continueToPaystack(plan){
     paymentUrl.includes("?")
       ? "&"
       : "?";
-
-  /*
-    The same Clerk email is passed to Paystack.
-    This allows the Paystack webhook to match
-    the payment to the Luméra account.
-  */
 
   window.location.href=
     paymentUrl +
@@ -1905,6 +1969,7 @@ async function buyPlan(plan){
     );
 
     return;
+
   }
 
   try{
@@ -1917,14 +1982,7 @@ async function buyPlan(plan){
 
     updateAccountUI();
 
-    /*
-      Account FIRST.
-      No payment before account creation.
-    */
-
     if(!currentUser){
-
-      pendingPlan=plan;
 
       setPendingPlan(plan);
 
@@ -1934,6 +1992,7 @@ async function buyPlan(plan){
       );
 
       return;
+
     }
 
     await continueToPaystack(plan);
@@ -1976,7 +2035,9 @@ async function signOut(){
 
   }catch(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
 
   }
 
@@ -1985,6 +2046,7 @@ async function signOut(){
 
 /* =========================================================
    LOAD ACCOUNT FROM BACKEND
+   DIAGNOSTIC VERSION
 ========================================================= */
 
 async function getAccount(){
@@ -2008,6 +2070,7 @@ async function getAccount(){
       "/api/account",
       {
         method:"GET",
+
         headers:{
           Authorization:
             "Bearer " + token
@@ -2015,8 +2078,63 @@ async function getAccount(){
       }
     );
 
-  const data=
-    await response.json();
+
+  /*
+    IMPORTANT DIAGNOSTIC:
+    We deliberately read the response as TEXT first.
+
+    This lets us see the actual response returned
+    by /api/account instead of getting only:
+
+    Unexpected token ... in JSON
+  */
+
+  const responseText=
+    await response.text();
+
+
+  console.log(
+    "===================================="
+  );
+
+  console.log(
+    "LUMÉRA ACCOUNT API STATUS:",
+    response.status
+  );
+
+  console.log(
+    "LUMÉRA ACCOUNT API RESPONSE:",
+    responseText
+  );
+
+  console.log(
+    "===================================="
+  );
+
+
+  let data;
+
+  try{
+
+    data=
+      JSON.parse(
+        responseText
+      );
+
+  }catch(parseError){
+
+    throw new Error(
+      "Luméra account API returned non-JSON data. HTTP " +
+      response.status +
+      ". Response: " +
+      responseText.slice(
+        0,
+        500
+      )
+    );
+
+  }
+
 
   if(!response.ok){
 
@@ -2111,7 +2229,9 @@ async function openScanner(){
 
     if(!currentUser){
 
-      await openAuth("signin");
+      await openAuth(
+        "signin"
+      );
 
       return false;
 
@@ -2119,13 +2239,6 @@ async function openScanner(){
 
     const rawAccount=
       await getAccount();
-
-    /*
-      IMPORTANT:
-      /api/account returns the account
-      directly, not { account: ... }.
-      This handles both formats safely.
-    */
 
     const account=
       rawAccount?.account ||
@@ -2157,7 +2270,9 @@ async function openScanner(){
       );
 
       document
-        .getElementById("access")
+        .getElementById(
+          "access"
+        )
         .scrollIntoView({
           behavior:"smooth"
         });
@@ -2172,7 +2287,8 @@ async function openScanner(){
 
     document.getElementById(
       "scanner"
-    ).style.display="block";
+    ).style.display=
+      "block";
 
     document.getElementById(
       "scanner"
@@ -2228,10 +2344,6 @@ async function startCamera(){
 
     }
 
-    /*
-      Stop any previous stream first.
-    */
-
     if(cameraStream){
 
       cameraStream
@@ -2249,15 +2361,19 @@ async function startCamera(){
         .getUserMedia({
 
           video:{
+
             facingMode:{
               ideal:"user"
             },
+
             width:{
               ideal:720
             },
+
             height:{
               ideal:720
             }
+
           },
 
           audio:false
@@ -2304,21 +2420,19 @@ async function beginGuidedScan(){
 
   if(!currentUser){
 
-    await openAuth("signin");
+    await openAuth(
+      "signin"
+    );
 
     return;
 
   }
 
   if(scanRunning){
-    return;
-  }
 
-  /*
-    Re-check the account before starting.
-    This prevents a stale frontend balance
-    from starting an unauthorized scan.
-  */
+    return;
+
+  }
 
   try{
 
@@ -2399,7 +2513,8 @@ async function beginGuidedScan(){
       "beginAnalysis"
     );
 
-  button.style.display="none";
+  button.style.display=
+    "none";
 
   const steps=[
 
@@ -2508,11 +2623,6 @@ async function completeScan(){
 
     }
 
-    /*
-      Capture a square image from
-      the center of the camera frame.
-    */
-
     const canvas=
       document.createElement(
         "canvas"
@@ -2531,11 +2641,6 @@ async function completeScan(){
       canvas.getContext(
         "2d"
       );
-
-    /*
-      Mirror the image so it matches
-      what the user sees on screen.
-    */
 
     ctx.translate(
       size,
@@ -2571,10 +2676,6 @@ async function completeScan(){
         0.86
       );
 
-    /*
-      Get authenticated Clerk token.
-    */
-
     const clerk=
       await ensureClerk();
 
@@ -2589,23 +2690,21 @@ async function completeScan(){
 
     }
 
-    /*
-      Send image + authenticated user
-      to the secure backend.
-    */
-
     const response=
       await fetch(
         "/api/analyze-skin",
         {
+
           method:"POST",
 
           headers:{
+
             "Content-Type":
               "application/json",
 
             "Authorization":
               "Bearer " + token
+
           },
 
           body:
@@ -2616,8 +2715,48 @@ async function completeScan(){
         }
       );
 
-    const data=
-      await response.json();
+
+    /*
+      Keep the analysis endpoint protected
+      against the same vague JSON parsing error.
+    */
+
+    const responseText=
+      await response.text();
+
+    console.log(
+      "LUMÉRA ANALYSIS API STATUS:",
+      response.status
+    );
+
+    console.log(
+      "LUMÉRA ANALYSIS API RESPONSE:",
+      responseText
+    );
+
+    let data;
+
+    try{
+
+      data=
+        JSON.parse(
+          responseText
+        );
+
+    }catch(parseError){
+
+      throw new Error(
+        "Luméra analysis API returned non-JSON data. HTTP " +
+        response.status +
+        ". Response: " +
+        responseText.slice(
+          0,
+          500
+        )
+      );
+
+    }
+
 
     if(!response.ok){
 
@@ -2628,20 +2767,10 @@ async function completeScan(){
 
     }
 
-    /*
-      The backend returns:
-      {
-        success:true,
-        analysis:{...},
-        access:{...}
-      }
-    */
-
     const analysis=
       data.analysis ||
       data;
 
-    /* SCORE */
 
     const score=
       Number(
@@ -2656,8 +2785,6 @@ async function completeScan(){
         : "—";
 
 
-    /* CONCERNS */
-
     const concerns=
       Array.isArray(
         analysis.concerns
@@ -2670,12 +2797,8 @@ async function completeScan(){
     ).textContent=
       concerns.length
         ? concerns.join(" • ")
-        : (
-            "No specific visible concerns were identified."
-          );
+        : "No specific visible concerns were identified.";
 
-
-    /* NEEDS */
 
     const needs=
       Array.isArray(
@@ -2689,12 +2812,8 @@ async function completeScan(){
     ).textContent=
       needs.length
         ? needs.join(" • ")
-        : (
-            "Your analysis did not identify specific needs."
-          );
+        : "Your analysis did not identify specific needs.";
 
-
-    /* MORNING ROUTINE */
 
     const morning=
       Array.isArray(
@@ -2703,8 +2822,6 @@ async function completeScan(){
         ? analysis.morningRoutine
         : [];
 
-
-    /* EVENING ROUTINE */
 
     const evening=
       Array.isArray(
@@ -2742,8 +2859,6 @@ async function completeScan(){
         : "Your personalized routine was not returned.";
 
 
-    /* PRODUCT RECOMMENDATIONS */
-
     const recommendations=
       Array.isArray(
         analysis.recommendations
@@ -2759,8 +2874,6 @@ async function completeScan(){
         : "No specific product recommendations were returned.";
 
 
-    /* LUMÉRA NOTE */
-
     document.getElementById(
       "analysisNote"
     ).textContent=
@@ -2769,11 +2882,6 @@ async function completeScan(){
         ? analysis.note
         : "Your Luméra analysis is based only on visible characteristics in the captured image.";
 
-
-    /*
-      If the backend returns updated access,
-      update the frontend counter.
-    */
 
     if(data.access){
 
@@ -2793,10 +2901,6 @@ async function completeScan(){
     }
 
 
-    /*
-      Show result.
-    */
-
     document.getElementById(
       "result"
     ).style.display=
@@ -2805,8 +2909,11 @@ async function completeScan(){
     document.getElementById(
       "result"
     ).scrollIntoView({
+
       behavior:"smooth",
+
       block:"center"
+
     });
 
 
@@ -2898,7 +3005,9 @@ function stopCamera(){
 async function refreshReturnedAccess(){
 
   if(!currentUser){
+
     return;
+
   }
 
   try{
@@ -2929,12 +3038,6 @@ async function refreshReturnedAccess(){
       Number(
         account.scan_credits || 0
       );
-
-    /*
-      If Paystack has returned the user
-      to Luméra and access now exists,
-      show the scanner.
-    */
 
     if(
       activeSubscription ||
@@ -2976,11 +3079,6 @@ async function init(){
 
     updateAccountUI();
 
-    /*
-      Handle account creation/login
-      followed by the selected plan.
-    */
-
     const plan=
       getPendingPlan();
 
@@ -3007,11 +3105,6 @@ async function init(){
 
     }
 
-    /*
-      If the URL contains a plan,
-      remember it for account creation.
-    */
-
     const urlPlan=
       new URLSearchParams(
         window.location.search
@@ -3028,12 +3121,6 @@ async function init(){
       );
 
     }
-
-    /*
-      If already signed in,
-      check whether an existing
-      Luméra entitlement exists.
-    */
 
     if(currentUser){
 
@@ -3062,9 +3149,13 @@ async function init(){
 window.addEventListener(
   "pageshow",
   async ()=>{
+
     if(currentUser){
+
       await refreshReturnedAccess();
+
     }
+
   }
 );
 
@@ -3097,4 +3188,4 @@ window.addEventListener(
 </script>
 
 </body>
-        </html>
+      </html>
