@@ -879,42 +879,30 @@ video{
   <div class="access-grid">
 
     <div class="access-card">
-
       <div class="access-icon">01</div>
-
       <h3>Scan</h3>
-
       <p>
         Use your phone camera and follow Luméra's
         positioning guidance.
       </p>
-
     </div>
 
     <div class="access-card">
-
       <div class="access-icon">02</div>
-
       <h3>Understand</h3>
-
       <p>
         Receive an AI-powered view of visible skin
         characteristics and concerns.
       </p>
-
     </div>
 
     <div class="access-card">
-
       <div class="access-icon">03</div>
-
       <h3>Personalize</h3>
-
       <p>
         Get skincare guidance, product recommendations
         and a routine built around your results.
       </p>
-
     </div>
 
   </div>
@@ -2045,65 +2033,30 @@ async function signOut(){
 
 
 /* =========================================================
-   LOAD ACCOUNT FROM BACKEND
-   DIAGNOSTIC VERSION
+   SAFE JSON RESPONSE READER
 ========================================================= */
 
-async function getAccount(){
+async function readLumeraJson(response, endpoint){
 
-  const clerk=
-    await ensureClerk();
-
-  const token=
-    await clerk.session?.getToken();
-
-  if(!token){
-
-    throw new Error(
-      "Your Luméra session is not ready. Please sign in again."
-    );
-
-  }
-
-  const response=
-    await fetch(
-      "/api/account",
-      {
-        method:"GET",
-
-        headers:{
-          Authorization:
-            "Bearer " + token
-        }
-      }
-    );
-
-
-  /*
-    IMPORTANT DIAGNOSTIC:
-    We deliberately read the response as TEXT first.
-
-    This lets us see the actual response returned
-    by /api/account instead of getting only:
-
-    Unexpected token ... in JSON
-  */
-
-  const responseText=
+  const responseText =
     await response.text();
-
 
   console.log(
     "===================================="
   );
 
   console.log(
-    "LUMÉRA ACCOUNT API STATUS:",
+    "LUMÉRA API:",
+    endpoint
+  );
+
+  console.log(
+    "HTTP STATUS:",
     response.status
   );
 
   console.log(
-    "LUMÉRA ACCOUNT API RESPONSE:",
+    "RESPONSE TEXT:",
     responseText
   );
 
@@ -2112,24 +2065,44 @@ async function getAccount(){
   );
 
 
+  if(!responseText){
+
+    throw new Error(
+      "Luméra " +
+      endpoint +
+      " returned an empty response. HTTP " +
+      response.status +
+      "."
+    );
+
+  }
+
+
   let data;
 
   try{
 
-    data=
+    data =
       JSON.parse(
         responseText
       );
 
   }catch(parseError){
 
+    console.error(
+      "Luméra invalid JSON response:",
+      responseText
+    );
+
     throw new Error(
-      "Luméra account API returned non-JSON data. HTTP " +
+      "Luméra " +
+      endpoint +
+      " returned a non-JSON response. HTTP " +
       response.status +
-      ". Response: " +
+      ". The server returned: " +
       responseText.slice(
         0,
-        500
+        300
       )
     );
 
@@ -2139,13 +2112,90 @@ async function getAccount(){
   if(!response.ok){
 
     throw new Error(
-      data.error ||
-      "Could not load your Luméra account."
+      data?.error ||
+      "Luméra " +
+      endpoint +
+      " request failed. HTTP " +
+      response.status +
+      "."
     );
 
   }
 
+
   return data;
+
+}
+
+
+/* =========================================================
+   LOAD ACCOUNT FROM BACKEND
+========================================================= */
+
+async function getAccount(){
+
+  const clerk =
+    await ensureClerk();
+
+  currentUser =
+    clerk.user || currentUser || null;
+
+  if(!currentUser){
+
+    throw new Error(
+      "You are not signed in to Luméra."
+    );
+
+  }
+
+
+  const session =
+    clerk.session;
+
+  if(!session){
+
+    throw new Error(
+      "Your Luméra session is not ready. Please sign in again."
+    );
+
+  }
+
+
+  const token =
+    await session.getToken();
+
+  if(!token){
+
+    throw new Error(
+      "Luméra could not obtain your secure account session. Please sign in again."
+    );
+
+  }
+
+
+  const response =
+    await fetch(
+      "/api/account",
+      {
+        method:"GET",
+
+        headers:{
+          "Authorization":
+            "Bearer " + token,
+
+          "Accept":
+            "application/json"
+        },
+
+        cache:"no-store"
+      }
+    );
+
+
+  return await readLumeraJson(
+    response,
+    "/api/account"
+  );
 
 }
 
@@ -2237,13 +2287,21 @@ async function openScanner(){
 
     }
 
-    const rawAccount=
+
+    const rawAccount =
       await getAccount();
 
-    const account=
+    const account =
       rawAccount?.account ||
       rawAccount ||
       {};
+
+
+    console.log(
+      "LUMÉRA ACCOUNT DATA:",
+      account
+    );
+
 
     const activeSubscription=
       (
@@ -2259,6 +2317,7 @@ async function openScanner(){
       Number(
         account.scan_credits || 0
       );
+
 
     if(
       !activeSubscription &&
@@ -2281,14 +2340,17 @@ async function openScanner(){
 
     }
 
+
     updateScannerAccessDisplay(
       account
     );
+
 
     document.getElementById(
       "scanner"
     ).style.display=
       "block";
+
 
     document.getElementById(
       "scanner"
@@ -2296,9 +2358,11 @@ async function openScanner(){
       behavior:"smooth"
     });
 
+
     await startCamera();
 
     return true;
+
 
   }catch(error){
 
@@ -2380,20 +2444,24 @@ async function startCamera(){
 
         });
 
+
     document.getElementById(
       "camera"
     ).srcObject=
       cameraStream;
+
 
     document.getElementById(
       "scanStatus"
     ).textContent=
       "Camera ready";
 
+
     document.getElementById(
       "scanInstruction"
     ).textContent=
       "Position your face inside the oval.";
+
 
   }catch(e){
 
@@ -2434,6 +2502,7 @@ async function beginGuidedScan(){
 
   }
 
+
   try{
 
     const rawAccount=
@@ -2443,6 +2512,7 @@ async function beginGuidedScan(){
       rawAccount?.account ||
       rawAccount ||
       {};
+
 
     const activeSubscription=
       (
@@ -2454,10 +2524,12 @@ async function beginGuidedScan(){
         account.plan_expires_at
       ) > new Date();
 
+
     const credits=
       Number(
         account.scan_credits || 0
       );
+
 
     if(
       !activeSubscription &&
@@ -2472,9 +2544,11 @@ async function beginGuidedScan(){
 
     }
 
+
     updateScannerAccessDisplay(
       account
     );
+
 
   }catch(error){
 
@@ -2491,7 +2565,9 @@ async function beginGuidedScan(){
 
   }
 
+
   scanRunning=true;
+
 
   const status=
     document.getElementById(
@@ -2513,8 +2589,10 @@ async function beginGuidedScan(){
       "beginAnalysis"
     );
 
+
   button.style.display=
     "none";
+
 
   const steps=[
 
@@ -2555,6 +2633,7 @@ async function beginGuidedScan(){
 
   ];
 
+
   for(
     let i=0;
     i<steps.length;
@@ -2574,6 +2653,7 @@ async function beginGuidedScan(){
         100
       ) + "%";
 
+
     await new Promise(
       resolve =>
         setTimeout(
@@ -2583,6 +2663,7 @@ async function beginGuidedScan(){
     );
 
   }
+
 
   await completeScan();
 
@@ -2602,15 +2683,18 @@ async function completeScan(){
     ).textContent=
       "Analyzing your skin…";
 
+
     document.getElementById(
       "scanInstruction"
     ).textContent=
       "Luméra is preparing your personalized result.";
 
+
     const video=
       document.getElementById(
         "camera"
       );
+
 
     if(
       !video.videoWidth ||
@@ -2623,10 +2707,12 @@ async function completeScan(){
 
     }
 
+
     const canvas=
       document.createElement(
         "canvas"
       );
+
 
     const size=
       Math.min(
@@ -2634,13 +2720,16 @@ async function completeScan(){
         video.videoHeight
       );
 
+
     canvas.width=size;
     canvas.height=size;
+
 
     const ctx=
       canvas.getContext(
         "2d"
       );
+
 
     ctx.translate(
       size,
@@ -2652,11 +2741,13 @@ async function completeScan(){
       1
     );
 
+
     const sx=
       (video.videoWidth-size)/2;
 
     const sy=
       (video.videoHeight-size)/2;
+
 
     ctx.drawImage(
       video,
@@ -2670,17 +2761,21 @@ async function completeScan(){
       size
     );
 
+
     const image=
       canvas.toDataURL(
         "image/jpeg",
         0.86
       );
 
+
     const clerk=
       await ensureClerk();
 
+
     const token=
       await clerk.session?.getToken();
+
 
     if(!token){
 
@@ -2689,6 +2784,7 @@ async function completeScan(){
       );
 
     }
+
 
     const response=
       await fetch(
@@ -2703,7 +2799,10 @@ async function completeScan(){
               "application/json",
 
             "Authorization":
-              "Bearer " + token
+              "Bearer " + token,
+
+            "Accept":
+              "application/json"
 
           },
 
@@ -2716,56 +2815,12 @@ async function completeScan(){
       );
 
 
-    /*
-      Keep the analysis endpoint protected
-      against the same vague JSON parsing error.
-    */
-
-    const responseText=
-      await response.text();
-
-    console.log(
-      "LUMÉRA ANALYSIS API STATUS:",
-      response.status
-    );
-
-    console.log(
-      "LUMÉRA ANALYSIS API RESPONSE:",
-      responseText
-    );
-
-    let data;
-
-    try{
-
-      data=
-        JSON.parse(
-          responseText
-        );
-
-    }catch(parseError){
-
-      throw new Error(
-        "Luméra analysis API returned non-JSON data. HTTP " +
-        response.status +
-        ". Response: " +
-        responseText.slice(
-          0,
-          500
-        )
+    const data =
+      await readLumeraJson(
+        response,
+        "/api/analyze-skin"
       );
 
-    }
-
-
-    if(!response.ok){
-
-      throw new Error(
-        data.error ||
-        "Skin analysis failed."
-      );
-
-    }
 
     const analysis=
       data.analysis ||
@@ -2776,6 +2831,7 @@ async function completeScan(){
       Number(
         analysis.score
       );
+
 
     document.getElementById(
       "scoreNumber"
@@ -2792,6 +2848,7 @@ async function completeScan(){
         ? analysis.concerns
         : [];
 
+
     document.getElementById(
       "concerns"
     ).textContent=
@@ -2806,6 +2863,7 @@ async function completeScan(){
       )
         ? analysis.needs
         : [];
+
 
     document.getElementById(
       "needs"
@@ -2833,6 +2891,7 @@ async function completeScan(){
 
     const routineParts=[];
 
+
     if(morning.length){
 
       routineParts.push(
@@ -2842,6 +2901,7 @@ async function completeScan(){
 
     }
 
+
     if(evening.length){
 
       routineParts.push(
@@ -2850,6 +2910,7 @@ async function completeScan(){
       );
 
     }
+
 
     document.getElementById(
       "routine"
@@ -2865,6 +2926,7 @@ async function completeScan(){
       )
         ? analysis.recommendations
         : [];
+
 
     document.getElementById(
       "recommendations"
@@ -2906,6 +2968,7 @@ async function completeScan(){
     ).style.display=
       "block";
 
+
     document.getElementById(
       "result"
     ).scrollIntoView({
@@ -2924,10 +2987,12 @@ async function completeScan(){
       error
     );
 
+
     alert(
       error.message ||
       "Luméra could not complete the skin analysis."
     );
+
 
   }finally{
 
@@ -2958,10 +3023,12 @@ function stopCamera(){
 
   }
 
+
   const video=
     document.getElementById(
       "camera"
     );
+
 
   if(video){
 
@@ -2969,10 +3036,12 @@ function stopCamera(){
 
   }
 
+
   const button=
     document.getElementById(
       "beginAnalysis"
     );
+
 
   if(button){
 
@@ -2981,10 +3050,12 @@ function stopCamera(){
 
   }
 
+
   const progress=
     document.getElementById(
       "scanProgress"
     );
+
 
   if(progress){
 
@@ -2992,6 +3063,7 @@ function stopCamera(){
       "0%";
 
   }
+
 
   scanRunning=false;
 
@@ -3010,19 +3082,23 @@ async function refreshReturnedAccess(){
 
   }
 
+
   try{
 
     const rawAccount=
       await getAccount();
+
 
     const account=
       rawAccount?.account ||
       rawAccount ||
       {};
 
+
     updateScannerAccessDisplay(
       account
     );
+
 
     const activeSubscription=
       (
@@ -3034,10 +3110,12 @@ async function refreshReturnedAccess(){
         account.plan_expires_at
       ) > new Date();
 
+
     const credits=
       Number(
         account.scan_credits || 0
       );
+
 
     if(
       activeSubscription ||
@@ -3050,6 +3128,7 @@ async function refreshReturnedAccess(){
         "block";
 
     }
+
 
   }catch(error){
 
@@ -3074,13 +3153,17 @@ async function init(){
     const clerk=
       await ensureClerk();
 
+
     currentUser=
       clerk.user || null;
 
+
     updateAccountUI();
+
 
     const plan=
       getPendingPlan();
+
 
     const returnedFromAuth=
       new URLSearchParams(
@@ -3088,6 +3171,7 @@ async function init(){
       ).get(
         "lumera_auth_return"
       ) === "1";
+
 
     if(
       plan &&
@@ -3097,18 +3181,22 @@ async function init(){
 
       setPendingPlan(null);
 
+
       await continueToPaystack(
         plan
       );
+
 
       return;
 
     }
 
+
     const urlPlan=
       new URLSearchParams(
         window.location.search
       ).get("plan");
+
 
     if(
       urlPlan &&
@@ -3122,11 +3210,13 @@ async function init(){
 
     }
 
+
     if(currentUser){
 
       await refreshReturnedAccess();
 
     }
+
 
   }catch(error){
 
@@ -3159,6 +3249,7 @@ window.addEventListener(
   }
 );
 
+
 document.addEventListener(
   "visibilitychange",
   async ()=>{
@@ -3188,4 +3279,4 @@ window.addEventListener(
 </script>
 
 </body>
-      </html>
+  </html>
