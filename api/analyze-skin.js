@@ -1,438 +1,609 @@
 import { createClerkClient } from "@clerk/backend";
 
-const clerkClient = createClerkClient({
+const clerk = createClerkClient({
   secretKey: process.env.CLERK_SECRET_KEY,
   publishableKey: process.env.CLERK_PUBLISHABLE_KEY
 });
 
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({
-      success: false,
-      error: "Method not allowed"
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+const AUTHORIZED_PARTY =
+  "https://lum-ra.vercel.app";
+
+async function authenticate(req) {
+  const result =
+    await clerk.authenticateRequest(req, {
+      authorizedParties: [AUTHORIZED_PARTY]
     });
+
+  if (!result.isAuthenticated) {
+    throw new Error("Unauthorized");
+  }
+
+  return result.toAuth();
+}
+
+async function supabaseRpc(
+  functionName,
+  body
+) {
+  if (
+    !SUPABASE_URL ||
+    !SUPABASE_SECRET_KEY
+  ) {
+    throw new Error(
+      "Supabase is not configured."
+    );
+  }
+
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/rpc/${functionName}`,
+    {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_SECRET_KEY,
+        Authorization:
+          `Bearer ${SUPABASE_SECRET_KEY}`,
+        "Content-Type":
+          "application/json"
+      },
+      body: JSON.stringify(body)
+    }
+  );
+
+  const text = await response.text();
+
+  let data = null;
+
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {}
+
+  if (!response.ok) {
+    throw new Error(
+      data?.message ||
+      data?.error ||
+      text ||
+      "Supabase request failed"
+    );
+  }
+
+  return data;
+}
+
+async function getEntitlements(email) {
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/lumera_entitlements?email=eq.${encodeURIComponent(
+      email
+    )}&select=id,email,plan,scan,scan_remaining,status,transaction_reference,expires_at`,
+    {
+      headers: {
+        apikey: SUPABASE_SECRET_KEY,
+        Authorization:
+          `Bearer ${SUPABASE_SECRET_KEY}`
+      }
+    }
+  );
+
+  const text = await response.text();
+
+  let rows = [];
+
+  try {
+    rows = text ? JSON.parse(text) : [];
+  } catch {}
+
+  if (!response.ok) {
+    throw new Error(
+      "Could not check Luméra account access."
+    );
+  }
+
+  return Array.isArray(rows)
+    ? rows
+    : [];
+}
+
+function hasAccess(rows) {
+  const now = Date.now();
+
+  const subscription = rows.find(row =>
+    (row.plan === "standard" ||
+      row.plan === "pro") &&
+    row.status === "active" &&
+    row.expires_at &&
+    new Date(row.expires_at).getTime() >
+      now
+  );
+
+  if (subscription) {
+    return {
+      allowed: true,
+      plan: subscription.plan,
+      subscription: true
+    };
+  }
+
+  const credits = rows
+    .filter(
+      row =>
+        row.plan === "3_scan_pass" &&
+        row.status === "active"
+    )
+    .reduce(
+      (sum, row) =>
+        sum +
+        Number(row.scan_remaining || 0),
+      0
+    );
+
+  return credits > 0
+    ? {
+        allowed: true,
+        plan: "3_scan_pass",
+        subscription: false,
+        scan_credits: credits
+      }
+    : {
+        allowed: false,
+        plan: null,
+        subscription: false,
+        scan_credits: 0
+      };
+}
+
+function parseAnalysis(outputText) {
+  const cleaned = String(
+    outputText || ""
+  )
+    .replace(/^```json\s*/i, "")
+    .replace(/```$/i, "")
+    .trim();
+
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    return null;
+  }
+}
+
+async function callOpenAI(image) {
+  const primaryModel =
+    process.env.LUMERA_OPENAI_MODEL ||
+    "gpt-5.6-luna";
+
+  const models = [primaryModel];
+
+  if (primaryModel !== "gpt-4.1-mini") {
+    models.push("gpt-4.1-mini");
+  }
+
+  let lastError = null;
+
+  for (const model of models) {
+    const response = await fetch(
+      "https://api.openai.com/v1/responses",
+      {
+        method: "POST",
+
+        headers: {
+          Authorization:
+            `Bearer ${OPENAI_API_KEY}`,
+
+          "Content-Type":
+            "application/json"
+        },
+
+        body: JSON.stringify({
+          model,
+
+          input: [
+            {
+              role: "user",
+
+              content: [
+                {
+                  type: "input_text",
+
+                  text: `
+You are Luméra, an AI cosmetic skincare analysis assistant.
+
+Analyze ONLY visible facial skin characteristics in the supplied image.
+
+Do not identify the person.
+
+Do not diagnose diseases.
+
+Do not prescribe medication.
+
+Do not make medical claims.
+
+Be conservative when the image is unclear.
+
+Return ONLY JSON with exactly these keys:
+
+{
+  "score": number from 1 to 10,
+  "summary": "short neutral visible-skin summary",
+  "concerns": [
+    "visible characteristic 1",
+    "visible characteristic 2"
+  ],
+  "needs": [
+    "cosmetic skincare need 1",
+    "cosmetic skincare need 2"
+  ],
+  "morning_routine": [
+    "step 1",
+    "step 2",
+    "step 3"
+  ],
+  "night_routine": [
+    "step 1",
+    "step 2",
+    "step 3"
+  ],
+  "recommendations": [
+    "specific product or brand category recommendation 1",
+    "recommendation 2",
+    "recommendation 3"
+  ],
+  "note": "short encouraging Luméra note"
+}
+
+For recommendations, use well-known international skincare brands when appropriate, including but not limited to:
+
+Anua
+Medicube
+CeraVe
+La Roche-Posay
+The Ordinary
+COSRX
+Beauty of Joseon
+Paula's Choice
+Cetaphil
+Eucerin
+Laneige
+
+Recommend products or product categories that logically match the visible characteristics.
+
+Do not invent product ingredients.
+
+Do not claim that a product will cure a medical condition.
+
+If image quality limits the analysis, mention the uncertainty.
+
+The recommendations should be practical skincare suggestions.
+
+The note should encourage the user to check back with Luméra in about 3 days for another skin checkup.
+`
+                },
+
+                {
+                  type: "input_image",
+                  image_url: image,
+                  detail: "high"
+                }
+              ]
+            }
+          ],
+
+          text: {
+            format: {
+              type: "json_object"
+            }
+          }
+        })
+      }
+    );
+
+    const text =
+      await response.text();
+
+    let data = null;
+
+    try {
+      data = text
+        ? JSON.parse(text)
+        : null;
+    } catch {}
+
+    if (response.ok) {
+      const outputText =
+        data?.output_text ||
+        data?.output
+          ?.flatMap(
+            item =>
+              item.content || []
+          )
+          .filter(
+            item =>
+              item.type ===
+              "output_text"
+          )
+          .map(
+            item => item.text
+          )
+          .join("\n") ||
+        "";
+
+      const analysis =
+        parseAnalysis(outputText);
+
+      if (analysis) {
+        return analysis;
+      }
+
+      lastError = new Error(
+        "Luméra received an invalid AI result."
+      );
+    } else {
+      console.error(
+        `OpenAI ${model} error:`,
+        text
+      );
+
+      lastError = new Error(
+        `OpenAI request failed (${response.status}).`
+      );
+
+      if (
+        response.status !== 400 &&
+        response.status !== 404
+      ) {
+        break;
+      }
+    }
+  }
+
+  throw (
+    lastError ||
+    new Error(
+      "Skin analysis service failed."
+    )
+  );
+}
+
+export default async function handler(
+  req,
+  res
+) {
+  if (req.method !== "POST") {
+    return res
+      .status(405)
+      .json({
+        error: "Method not allowed"
+      });
   }
 
   try {
-    // =====================================================
-    // 1. VERIFY CLERK SESSION
-    // =====================================================
-
-    const { isAuthenticated, toAuth } =
-      await clerkClient.authenticateRequest(req, {
-        authorizedParties: [
-          "https://lum-ra.vercel.app",
-          "https://lum-d7ipe8e2b-geraldmings.vercel.app"
-        ]
-      });
-
-    if (!isAuthenticated) {
-      return res.status(401).json({
-        success: false,
-        error: "You must be signed in."
-      });
-    }
-
-    const auth = toAuth();
-    const userId = auth.userId;
-
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        error: "Clerk user not found."
-      });
-    }
-
-    // =====================================================
-    // 2. GET USER EMAIL
-    // =====================================================
+    const auth =
+      await authenticate(req);
 
     const user =
-      await clerkClient.users.getUser(userId);
+      await clerk.users.getUser(
+        auth.userId
+      );
 
-    const email =
-      user.primaryEmailAddress?.emailAddress
-        ?.trim()
-        ?.toLowerCase();
+    const email = (
+      user.primaryEmailAddress
+        ?.emailAddress ||
+      user.emailAddresses?.[0]
+        ?.emailAddress ||
+      ""
+    )
+      .trim()
+      .toLowerCase();
 
     if (!email) {
-      return res.status(400).json({
-        success: false,
-        error: "No email address found for this account."
-      });
-    }
-
-    // =====================================================
-    // 3. GET IMAGE
-    // =====================================================
-
-    const { image } = req.body || {};
-
-    if (!image) {
-      return res.status(400).json({
-        success: false,
-        error: "No image was provided."
-      });
-    }
-
-    // =====================================================
-    // 4. CHECK LUMÉRA ACCOUNT
-    // =====================================================
-
-    const accountResponse =
-      await fetch(
-        `${process.env.SUPABASE_URL}/rest/v1/lumera_accounts?email=eq.${encodeURIComponent(
-          email
-        )}&select=email,scan_credits,plan,plan_expires_at`,
-        {
-          method: "GET",
-          headers: {
-            apikey:
-              process.env.SUPABASE_SECRET_KEY,
-
-            Authorization:
-              `Bearer ${process.env.SUPABASE_SECRET_KEY}`
-          }
-        }
-      );
-
-    if (!accountResponse.ok) {
-      const error =
-        await accountResponse.text();
-
-      console.error(
-        "Luméra account lookup error:",
-        error
-      );
-
-      return res.status(500).json({
-        success: false,
-        error: "Could not check Luméra access."
-      });
-    }
-
-    const accounts =
-      await accountResponse.json();
-
-    if (!accounts.length) {
-      return res.status(403).json({
-        success: false,
-        error: "No Luméra access found."
-      });
-    }
-
-    const account =
-      accounts[0];
-
-    const credits =
-      Number(account.scan_credits || 0);
-
-    const planActive =
-      account.plan &&
-      account.plan_expires_at &&
-      new Date(account.plan_expires_at) > new Date();
-
-    // =====================================================
-    // 5. CONSUME ONE SCAN
-    // =====================================================
-
-    let remainingCredits =
-      credits;
-
-    if (!planActive) {
-
-      if (credits <= 0) {
-        return res.status(403).json({
-          success: false,
-          error: "No scans remaining."
+      return res
+        .status(400)
+        .json({
+          error:
+            "No verified email on account"
         });
-      }
+    }
 
-      const updateResponse =
-        await fetch(
-          `${process.env.SUPABASE_URL}/rest/v1/lumera_accounts?email=eq.${encodeURIComponent(
-            email
-          )}`,
-          {
-            method: "PATCH",
+    const image =
+      req.body?.image;
 
-            headers: {
-              "Content-Type":
-                "application/json",
-
-              apikey:
-                process.env.SUPABASE_SECRET_KEY,
-
-              Authorization:
-                `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
-
-              Prefer:
-                "return=representation"
-            },
-
-            body: JSON.stringify({
-              scan_credits:
-                credits - 1,
-
-              updated_at:
-                new Date().toISOString()
-            })
-          }
-        );
-
-      if (!updateResponse.ok) {
-        const error =
-          await updateResponse.text();
-
-        console.error(
-          "Scan credit update error:",
-          error
-        );
-
-        return res.status(500).json({
-          success: false,
-          error: "Could not use your scan."
+    if (
+      !image ||
+      typeof image !== "string" ||
+      !image.startsWith(
+        "data:image/"
+      )
+    ) {
+      return res
+        .status(400)
+        .json({
+          error:
+            "A valid scan image is required."
         });
-      }
-
-      remainingCredits =
-        credits - 1;
     }
 
-    // =====================================================
-    // 6. SEND FACE IMAGE TO OPENAI
-    // =====================================================
+    if (!OPENAI_API_KEY) {
+      return res
+        .status(500)
+        .json({
+          error:
+            "AI analysis is not configured."
+        });
+    }
 
-    const response =
-      await fetch(
-        "https://api.openai.com/v1/responses",
-        {
-          method: "POST",
+    if (
+      !SUPABASE_URL ||
+      !SUPABASE_SECRET_KEY
+    ) {
+      return res
+        .status(500)
+        .json({
+          error:
+            "Supabase is not configured."
+        });
+    }
 
-          headers: {
-            "Content-Type":
-              "application/json",
-
-            Authorization:
-              `Bearer ${process.env.OPENAI_API_KEY}`
-          },
-
-          body: JSON.stringify({
-            model: "gpt-5.6-luna",
-
-            input: [
-              {
-                role: "user",
-
-                content: [
-                  {
-                    type: "input_text",
-
-                    text: `
-You are Luméra, a skincare analysis assistant.
-
-Analyze the visible characteristics of the person's facial skin in the provided image.
-
-Do NOT diagnose medical conditions.
-
-Give practical, general skincare guidance based only on what is visibly apparent.
-
-Return ONLY valid JSON in exactly this structure:
-
-{
-  "score": 0,
-  "concerns": [],
-  "needs": [],
-  "morningRoutine": [],
-  "eveningRoutine": [],
-  "recommendations": [],
-  "note": ""
-}
-
-Rules:
-- score must be a number from 1 to 10.
-- concerns should contain short descriptions of visible skin concerns.
-- needs should explain what the skin may benefit from.
-- morningRoutine should contain practical skincare steps.
-- eveningRoutine should contain practical skincare steps.
-- recommendations should contain well-known skincare product categories or brands when appropriate.
-- note should be a short encouraging message.
-- Do not claim certainty about medical conditions.
-- Do not identify the person's identity.
-`
-                  },
-
-                  {
-                    type: "input_image",
-                    image_url: image
-                  }
-                ]
-              }
-            ],
-
-            max_output_tokens: 1000
-          })
-        }
+    // Check paid access BEFORE using OpenAI.
+    const rows =
+      await getEntitlements(
+        email
       );
 
-    const data =
-      await response.json();
+    const access =
+      hasAccess(rows);
 
-    if (!response.ok) {
-
-      console.error(
-        "OpenAI error:",
-        data
-      );
-
-      return res.status(
-        response.status
-      ).json({
-        success: false,
-        error:
-          data?.error?.message ||
-          "OpenAI analysis failed."
-      });
+    if (!access.allowed) {
+      return res
+        .status(403)
+        .json({
+          error:
+            "No active Luméra access or scan credits remaining."
+        });
     }
 
-    // =====================================================
-    // 7. EXTRACT AI RESPONSE
-    // =====================================================
-
-    let outputText = "";
-
-    if (data.output) {
-
-      for (const item of data.output) {
-
-        if (!item.content) {
-          continue;
-        }
-
-        for (const content of item.content) {
-
-          if (
-            content.type ===
-            "output_text"
-          ) {
-
-            outputText +=
-              content.text;
-
-          }
-
-        }
-
-      }
-
-    }
-
-    if (!outputText) {
-      throw new Error(
-        "OpenAI returned no analysis."
-      );
-    }
-
-    outputText =
-      outputText
-        .replace(/```json/g, "")
-        .replace(/```/g, "")
-        .trim();
-
+    // OpenAI performs the actual
+    // skin analysis and recommendations.
     const analysis =
-      JSON.parse(outputText);
+      await callOpenAI(image);
 
-    // =====================================================
-    // 8. VALIDATE RESULT
-    // =====================================================
-
-    analysis.score =
-      Math.max(
-        1,
-        Math.min(
-          10,
-          Number(
-            analysis.score
-          ) || 1
-        )
+    // Consume one 3-scan credit
+    // ONLY after a successful AI result.
+    //
+    // Standard and Pro remain
+    // unlimited while active.
+    const entitlement =
+      await supabaseRpc(
+        "consume_lumera_scan",
+        {
+          p_email: email
+        }
       );
 
-    analysis.concerns =
-      Array.isArray(
-        analysis.concerns
+    if (!entitlement?.allowed) {
+      return res
+        .status(403)
+        .json({
+          error:
+            "Your Luméra access changed before the result could be delivered. Please try again."
+        });
+    }
+
+    const score = Math.max(
+      1,
+      Math.min(
+        10,
+        Number(
+          analysis.score
+        ) || 1
       )
-        ? analysis.concerns
-        : [];
+    );
 
-    analysis.needs =
-      Array.isArray(
-        analysis.needs
-      )
-        ? analysis.needs
-        : [];
+    const result = {
+      score,
 
-    analysis.morningRoutine =
-      Array.isArray(
-        analysis.morningRoutine
-      )
-        ? analysis.morningRoutine
-        : [];
+      summary:
+        analysis.summary ||
+        "Visible skin characteristics were reviewed.",
 
-    analysis.eveningRoutine =
-      Array.isArray(
-        analysis.eveningRoutine
-      )
-        ? analysis.eveningRoutine
-        : [];
+      concerns:
+        Array.isArray(
+          analysis.concerns
+        )
+          ? analysis.concerns
+          : [],
 
-    analysis.recommendations =
-      Array.isArray(
-        analysis.recommendations
-      )
-        ? analysis.recommendations
-        : [];
+      needs:
+        Array.isArray(
+          analysis.needs
+        )
+          ? analysis.needs
+          : [],
 
-    analysis.note =
-      typeof analysis.note ===
-      "string"
-        ? analysis.note
-        : "";
+      morning_routine:
+        Array.isArray(
+          analysis.morning_routine
+        )
+          ? analysis.morning_routine
+          : [],
 
-    // =====================================================
-    // 9. RETURN RESULT
-    // =====================================================
+      night_routine:
+        Array.isArray(
+          analysis.night_routine
+        )
+          ? analysis.night_routine
+          : [],
 
-    return res.status(200).json({
+      recommendations:
+        Array.isArray(
+          analysis.recommendations
+        )
+          ? analysis.recommendations
+          : [],
 
-      success: true,
-
-      analysis,
-
-      access: {
-        plan:
-          planActive
-            ? account.plan
-            : null,
-
-        scan_credits:
-          remainingCredits
-      },
+      note:
+        analysis.note ||
+        "Check back with Luméra in about 3 days for another skin checkup.",
 
       disclaimer:
-        "Luméra provides cosmetic skincare guidance and is not a medical diagnosis."
+        "Luméra provides cosmetic skincare guidance and is not a medical diagnosis or substitute for professional medical advice."
+    };
+
+    return res.status(200).json({
+      success: true,
+
+      analysis: result,
+
+      access: {
+        email,
+
+        plan:
+          entitlement.plan ||
+          access.plan,
+
+        status: "active",
+
+        scan_credits:
+          Number(
+            entitlement.scan_credits ??
+              access.scan_credits ??
+              0
+          ),
+
+        plan_expires_at:
+          access.plan === "standard" ||
+          access.plan === "pro"
+            ? (
+                rows.find(
+                  r =>
+                    r.plan ===
+                      access.plan &&
+                    r.status ===
+                      "active"
+                )?.expires_at ||
+                null
+              )
+            : null
+      }
     });
-
   } catch (error) {
-
     console.error(
-      "Luméra API error:",
+      "Luméra analysis error:",
       error
     );
 
-    return res.status(500).json({
-      success: false,
-      error:
-        "Luméra could not analyze the image."
-    });
+    return res
+      .status(
+        error.message ===
+          "Unauthorized"
+          ? 401
+          : 500
+      )
+      .json({
+        error:
+          error.message ||
+          "Skin analysis failed."
+      });
   }
-}
+        }
