@@ -1517,6 +1517,147 @@ let pendingPlan = null;
 
 
 /* =========================================================
+   SAFE ERROR FORMATTER
+   Prevents [object Object]
+========================================================= */
+
+function formatLumeraError(error, fallback){
+
+  const defaultMessage =
+    fallback ||
+    "Luméra encountered an unexpected error.";
+
+  if(error === null || error === undefined){
+
+    return defaultMessage;
+
+  }
+
+  if(typeof error === "string"){
+
+    return error.trim() || defaultMessage;
+
+  }
+
+  if(error instanceof Error){
+
+    if(
+      typeof error.message === "string" &&
+      error.message.trim()
+    ){
+
+      return error.message;
+
+    }
+
+  }
+
+  if(
+    typeof error.message === "string" &&
+    error.message.trim()
+  ){
+
+    return error.message;
+
+  }
+
+  if(
+    typeof error.error === "string" &&
+    error.error.trim()
+  ){
+
+    return error.error;
+
+  }
+
+  if(
+    error.error &&
+    typeof error.error === "object"
+  ){
+
+    const nested =
+      formatLumeraError(
+        error.error,
+        ""
+      );
+
+    if(
+      nested &&
+      nested !== "[object Object]"
+    ){
+
+      return nested;
+
+    }
+
+  }
+
+  if(
+    typeof error.detail === "string" &&
+    error.detail.trim()
+  ){
+
+    return error.detail;
+
+  }
+
+  if(
+    typeof error.message === "object" &&
+    error.message !== null
+  ){
+
+    const nested =
+      formatLumeraError(
+        error.message,
+        ""
+      );
+
+    if(
+      nested &&
+      nested !== "[object Object]"
+    ){
+
+      return nested;
+
+    }
+
+  }
+
+  try{
+
+    const json =
+      JSON.stringify(
+        error,
+        null,
+        2
+      );
+
+    if(
+      json &&
+      json !== "{}"
+    ){
+
+      return json;
+
+    }
+
+  }catch(jsonError){
+
+    console.error(
+      "Could not stringify Luméra error:",
+      jsonError
+    );
+
+  }
+
+  return String(error) === "[object Object]"
+    ? defaultMessage
+    : String(error);
+
+}
+
+
+/* =========================================================
    PENDING PLAN
 ========================================================= */
 
@@ -1879,7 +2020,10 @@ async function openAuth(
     );
 
     alert(
-      "Luméra could not open the account system. Please refresh once and try again."
+      formatLumeraError(
+        error,
+        "Luméra could not open the account system. Please refresh once and try again."
+      )
     );
 
   }
@@ -1987,10 +2131,16 @@ async function buyPlan(plan){
 
   }catch(error){
 
-    console.error(error);
+    console.error(
+      "Luméra buy plan error:",
+      error
+    );
 
     alert(
-      "Luméra could not open the account system. Please try again."
+      formatLumeraError(
+        error,
+        "Luméra could not open the account system. Please try again."
+      )
     );
 
   }
@@ -2024,7 +2174,15 @@ async function signOut(){
   }catch(error){
 
     console.error(
+      "Luméra sign out error:",
       error
+    );
+
+    alert(
+      formatLumeraError(
+        error,
+        "Luméra could not sign you out."
+      )
     );
 
   }
@@ -2111,13 +2269,21 @@ async function readLumeraJson(response, endpoint){
 
   if(!response.ok){
 
+    const serverError =
+      data?.error ??
+      data?.message ??
+      data?.detail ??
+      data;
+
     throw new Error(
-      data?.error ||
-      "Luméra " +
-      endpoint +
-      " request failed. HTTP " +
-      response.status +
-      "."
+      formatLumeraError(
+        serverError,
+        "Luméra " +
+        endpoint +
+        " request failed. HTTP " +
+        response.status +
+        "."
+      )
     );
 
   }
@@ -2371,9 +2537,19 @@ async function openScanner(){
       error
     );
 
+    const readableError =
+      formatLumeraError(
+        error,
+        "Luméra could not open the scanner."
+      );
+
+    console.error(
+      "Readable Luméra scanner error:",
+      readableError
+    );
+
     alert(
-      error.message ||
-      "Luméra could not open the scanner."
+      readableError
     );
 
     return false;
@@ -2473,7 +2649,10 @@ async function startCamera(){
     error.textContent=
       e.name==="NotAllowedError"
         ? "Camera permission was denied. Allow camera access and try again."
-        : "We couldn't access your camera. Check your browser permissions.";
+        : formatLumeraError(
+            e,
+            "We couldn't access your camera. Check your browser permissions."
+          );
 
   }
 
@@ -2520,9 +2699,7 @@ async function beginGuidedScan(){
         account.plan==="pro"
       ) &&
       account.plan_expires_at &&
-      new Date(
-        account.plan_expires_at
-      ) > new Date();
+      new Date(account.plan_expires_at) > new Date();
 
 
     const credits=
@@ -2553,12 +2730,15 @@ async function beginGuidedScan(){
   }catch(error){
 
     console.error(
+      "Luméra guided scan access error:",
       error
     );
 
     alert(
-      error.message ||
-      "Luméra could not verify your scan access."
+      formatLumeraError(
+        error,
+        "Luméra could not verify your scan access."
+      )
     );
 
     return;
@@ -2667,6 +2847,7 @@ async function beginGuidedScan(){
 
   await completeScan();
 
+
 }
 
 
@@ -2756,527 +2937,4 @@ async function completeScan(){
       size,
       size,
       0,
-      0,
-      size,
-      size
-    );
-
-
-    const image=
-      canvas.toDataURL(
-        "image/jpeg",
-        0.86
-      );
-
-
-    const clerk=
-      await ensureClerk();
-
-
-    const token=
-      await clerk.session?.getToken();
-
-
-    if(!token){
-
-      throw new Error(
-        "Your Luméra session has expired. Please sign in again."
-      );
-
-    }
-
-
-    const response=
-      await fetch(
-        "/api/analyze-skin",
-        {
-
-          method:"POST",
-
-          headers:{
-
-            "Content-Type":
-              "application/json",
-
-            "Authorization":
-              "Bearer " + token,
-
-            "Accept":
-              "application/json"
-
-          },
-
-          body:
-            JSON.stringify({
-              image:image
-            })
-
-        }
-      );
-
-
-    const data =
-      await readLumeraJson(
-        response,
-        "/api/analyze-skin"
-      );
-
-
-    const analysis=
-      data.analysis ||
-      data;
-
-
-    const score=
-      Number(
-        analysis.score
-      );
-
-
-    document.getElementById(
-      "scoreNumber"
-    ).textContent=
-      Number.isFinite(score)
-        ? score
-        : "—";
-
-
-    const concerns=
-      Array.isArray(
-        analysis.concerns
-      )
-        ? analysis.concerns
-        : [];
-
-
-    document.getElementById(
-      "concerns"
-    ).textContent=
-      concerns.length
-        ? concerns.join(" • ")
-        : "No specific visible concerns were identified.";
-
-
-    const needs=
-      Array.isArray(
-        analysis.needs
-      )
-        ? analysis.needs
-        : [];
-
-
-    document.getElementById(
-      "needs"
-    ).textContent=
-      needs.length
-        ? needs.join(" • ")
-        : "Your analysis did not identify specific needs.";
-
-
-    const morning=
-      Array.isArray(
-        analysis.morningRoutine
-      )
-        ? analysis.morningRoutine
-        : [];
-
-
-    const evening=
-      Array.isArray(
-        analysis.eveningRoutine
-      )
-        ? analysis.eveningRoutine
-        : [];
-
-
-    const routineParts=[];
-
-
-    if(morning.length){
-
-      routineParts.push(
-        "Morning:\n" +
-        morning.join(" → ")
-      );
-
-    }
-
-
-    if(evening.length){
-
-      routineParts.push(
-        "Evening:\n" +
-        evening.join(" → ")
-      );
-
-    }
-
-
-    document.getElementById(
-      "routine"
-    ).textContent=
-      routineParts.length
-        ? routineParts.join("\n\n")
-        : "Your personalized routine was not returned.";
-
-
-    const recommendations=
-      Array.isArray(
-        analysis.recommendations
-      )
-        ? analysis.recommendations
-        : [];
-
-
-    document.getElementById(
-      "recommendations"
-    ).textContent=
-      recommendations.length
-        ? recommendations.join(" • ")
-        : "No specific product recommendations were returned.";
-
-
-    document.getElementById(
-      "analysisNote"
-    ).textContent=
-      typeof analysis.note==="string" &&
-      analysis.note.trim()
-        ? analysis.note
-        : "Your Luméra analysis is based only on visible characteristics in the captured image.";
-
-
-    if(data.access){
-
-      updateScannerAccessDisplay({
-
-        plan:
-          data.access.plan,
-
-        scan_credits:
-          data.access.scan_credits,
-
-        plan_expires_at:
-          data.access.plan_expires_at
-
-      });
-
-    }
-
-
-    document.getElementById(
-      "result"
-    ).style.display=
-      "block";
-
-
-    document.getElementById(
-      "result"
-    ).scrollIntoView({
-
-      behavior:"smooth",
-
-      block:"center"
-
-    });
-
-
-  }catch(error){
-
-    console.error(
-      "Skin analysis error:",
-      error
-    );
-
-
-    alert(
-      error.message ||
-      "Luméra could not complete the skin analysis."
-    );
-
-
-  }finally{
-
-    stopCamera();
-
-    scanRunning=false;
-
-  }
-
-}
-
-
-/* =========================================================
-   STOP CAMERA
-========================================================= */
-
-function stopCamera(){
-
-  if(cameraStream){
-
-    cameraStream
-      .getTracks()
-      .forEach(
-        track=>track.stop()
-      );
-
-    cameraStream=null;
-
-  }
-
-
-  const video=
-    document.getElementById(
-      "camera"
-    );
-
-
-  if(video){
-
-    video.srcObject=null;
-
-  }
-
-
-  const button=
-    document.getElementById(
-      "beginAnalysis"
-    );
-
-
-  if(button){
-
-    button.style.display=
-      "inline-flex";
-
-  }
-
-
-  const progress=
-    document.getElementById(
-      "scanProgress"
-    );
-
-
-  if(progress){
-
-    progress.style.width=
-      "0%";
-
-  }
-
-
-  scanRunning=false;
-
-}
-
-
-/* =========================================================
-   CHECK ACCOUNT AFTER RETURNING TO SITE
-========================================================= */
-
-async function refreshReturnedAccess(){
-
-  if(!currentUser){
-
-    return;
-
-  }
-
-
-  try{
-
-    const rawAccount=
-      await getAccount();
-
-
-    const account=
-      rawAccount?.account ||
-      rawAccount ||
-      {};
-
-
-    updateScannerAccessDisplay(
-      account
-    );
-
-
-    const activeSubscription=
-      (
-        account.plan==="standard" ||
-        account.plan==="pro"
-      ) &&
-      account.plan_expires_at &&
-      new Date(
-        account.plan_expires_at
-      ) > new Date();
-
-
-    const credits=
-      Number(
-        account.scan_credits || 0
-      );
-
-
-    if(
-      activeSubscription ||
-      credits>0
-    ){
-
-      document.getElementById(
-        "scanner"
-      ).style.display=
-        "block";
-
-    }
-
-
-  }catch(error){
-
-    console.error(
-      "Returned access check failed:",
-      error
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   INITIALIZE
-========================================================= */
-
-async function init(){
-
-  try{
-
-    const clerk=
-      await ensureClerk();
-
-
-    currentUser=
-      clerk.user || null;
-
-
-    updateAccountUI();
-
-
-    const plan=
-      getPendingPlan();
-
-
-    const returnedFromAuth=
-      new URLSearchParams(
-        window.location.search
-      ).get(
-        "lumera_auth_return"
-      ) === "1";
-
-
-    if(
-      plan &&
-      currentUser &&
-      returnedFromAuth
-    ){
-
-      setPendingPlan(null);
-
-
-      await continueToPaystack(
-        plan
-      );
-
-
-      return;
-
-    }
-
-
-    const urlPlan=
-      new URLSearchParams(
-        window.location.search
-      ).get("plan");
-
-
-    if(
-      urlPlan &&
-      PAYSTACK_LINKS[urlPlan] &&
-      !currentUser
-    ){
-
-      setPendingPlan(
-        urlPlan
-      );
-
-    }
-
-
-    if(currentUser){
-
-      await refreshReturnedAccess();
-
-    }
-
-
-  }catch(error){
-
-    console.error(
-      "Luméra startup error:",
-      error
-    );
-
-    updateAccountUI();
-
-  }
-
-}
-
-
-/* =========================================================
-   PAGE RETURN / VISIBILITY
-========================================================= */
-
-window.addEventListener(
-  "pageshow",
-  async ()=>{
-
-    if(currentUser){
-
-      await refreshReturnedAccess();
-
-    }
-
-  }
-);
-
-
-document.addEventListener(
-  "visibilitychange",
-  async ()=>{
-
-    if(
-      document.visibilityState==="visible" &&
-      currentUser
-    ){
-
-      await refreshReturnedAccess();
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   START APP
-========================================================= */
-
-window.addEventListener(
-  "load",
-  init
-);
-
-</script>
-
-</body>
-  </html>
+      0
