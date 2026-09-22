@@ -14,8 +14,8 @@ export default async function handler(req, res) {
     const { isAuthenticated, toAuth } =
       await clerkClient.authenticateRequest(req, {
         authorizedParties: [
-          "https://lum-d7ipe8e2b-geraldmings.vercel.app"
-        ]
+  "https://lum-ra.vercel.app"
+]
       });
 
     if (!isAuthenticated) {
