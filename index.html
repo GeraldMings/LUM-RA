@@ -2212,3 +2212,832 @@ async function readLumeraJson(
     endpoint,
     response.status,
     text
+    async function startCamera(){
+  const errorEl=document.getElementById("cameraError");
+  errorEl.textContent="";
+
+  if(!navigator.mediaDevices?.getUserMedia){
+    errorEl.textContent=
+      "Camera access is not supported by this browser.";
+    return;
+  }
+
+  try{
+    if(cameraStream)stopCamera();
+
+    cameraStream=
+      await navigator.mediaDevices.getUserMedia({
+        video:{
+          facingMode:{ideal:"user"},
+          width:{ideal:720},
+          height:{ideal:720}
+        },
+        audio:false
+      });
+
+    const video=
+      document.getElementById("camera");
+
+    video.srcObject=cameraStream;
+
+    await video.play().catch(()=>{});
+
+    document.getElementById("scanStatus").textContent=
+      "Camera ready";
+
+    document.getElementById("scanInstruction").textContent=
+      "Position your face inside the oval.";
+
+  }catch(error){
+
+    console.error(
+      "Camera error:",
+      error
+    );
+
+    errorEl.textContent=
+      error?.name==="NotAllowedError"
+        ? "Camera permission was denied. Allow camera access in your browser settings, then try again."
+        : "We couldn't access your camera. Check your browser permissions and try again.";
+  }
+}
+
+async function beginGuidedScan(){
+
+  try{
+
+    const clerk=
+      await ensureClerk();
+
+    currentUser=
+      clerk.user||null;
+
+    updateAccountUI();
+
+    if(!currentUser){
+
+      await openAuth("signin");
+
+      return;
+    }
+
+    // Re-check entitlement immediately before
+    // starting the actual scan.
+    const raw=
+      await getAccount();
+
+    const account=
+      raw?.account||
+      raw||
+      {};
+
+    currentAccount=
+      account;
+
+    updateScannerAccessDisplay(
+      account
+    );
+
+    const plan=
+      account.plan||null;
+
+    const credits=
+      Number(
+        account.scan_credits||0
+      );
+
+    const activeSubscription=
+      (
+        plan==="standard" ||
+        plan==="pro"
+      ) &&
+      account.status==="active" &&
+      account.plan_expires_at &&
+      new Date(
+        account.plan_expires_at
+      ).getTime() >
+      Date.now();
+
+    const hasScanPass=
+      plan==="3_scan_pass" &&
+      credits>0;
+
+    if(
+      !activeSubscription &&
+      !hasScanPass
+    ){
+
+      alert(
+        "Your Luméra access is not active. Please purchase a plan before scanning."
+      );
+
+      document.getElementById(
+        "scanner"
+      ).style.display="none";
+
+      return;
+    }
+
+    if(scanRunning)return;
+
+    if(!cameraStream){
+
+      await startCamera();
+
+      if(!cameraStream)return;
+    }
+
+    scanRunning=true;
+
+    const statusEl=
+      document.getElementById(
+        "scanStatus"
+      );
+
+    const instruction=
+      document.getElementById(
+        "scanInstruction"
+      );
+
+    const progress=
+      document.getElementById(
+        "scanProgress"
+      );
+
+    const button=
+      document.getElementById(
+        "beginAnalysis"
+      );
+
+    button.style.display="none";
+
+    document.getElementById(
+      "result"
+    ).style.display="none";
+
+    progress.style.width="0%";
+
+    const steps=[
+
+      [
+        "Position your face",
+        "Place your face inside the oval and look directly at the camera."
+      ],
+
+      [
+        "Perfect your position",
+        "Move slightly to the LEFT."
+      ],
+
+      [
+        "Perfect your position",
+        "Now shift slightly to the RIGHT."
+      ],
+
+      [
+        "Check your angle",
+        "Tilt your face slightly UP."
+      ],
+
+      [
+        "Check your angle",
+        "Now tilt your face slightly DOWN."
+      ],
+
+      [
+        "Hold still",
+        "Keep your face centered and stay still."
+      ],
+
+      [
+        "Perfect",
+        "Hold still while Luméra captures your scan."
+      ]
+
+    ];
+
+    for(
+      let i=0;
+      i<steps.length;
+      i++
+    ){
+
+      if(!cameraStream){
+
+        throw new Error(
+          "Camera was closed before the scan finished."
+        );
+      }
+
+      statusEl.textContent=
+        steps[i][0];
+
+      instruction.textContent=
+        steps[i][1];
+
+      progress.style.width=
+        `${((i+1)/steps.length)*100}%`;
+
+      await new Promise(
+        resolve=>
+          setTimeout(
+            resolve,
+            1200
+          )
+      );
+    }
+
+    await completeScan();
+
+  }catch(error){
+
+    console.error(
+      "Guided scan error:",
+      error
+    );
+
+    alert(
+      lumeraErrorMessage(
+        error,
+        "Luméra could not start the scan."
+      )
+    );
+
+    scanRunning=false;
+
+    document.getElementById(
+      "beginAnalysis"
+    ).style.display=
+      "inline-flex";
+  }
+}
+
+async function completeScan(){
+
+  const video=
+    document.getElementById(
+      "camera"
+    );
+
+  const statusEl=
+    document.getElementById(
+      "scanStatus"
+    );
+
+  const instruction=
+    document.getElementById(
+      "scanInstruction"
+    );
+
+  statusEl.textContent=
+    "Analyzing your skin…";
+
+  instruction.textContent=
+    "Luméra is preparing your personalized facial analysis.";
+
+  try{
+
+    if(
+      !video.videoWidth ||
+      !video.videoHeight
+    ){
+
+      throw new Error(
+        "Camera image is not ready yet. Please try the scan again."
+      );
+    }
+
+    const size=
+      Math.min(
+        video.videoWidth,
+        video.videoHeight
+      );
+
+    const canvas=
+      document.createElement(
+        "canvas"
+      );
+
+    canvas.width=size;
+    canvas.height=size;
+
+    const ctx=
+      canvas.getContext("2d");
+
+    ctx.translate(
+      size,
+      0
+    );
+
+    ctx.scale(
+      -1,
+      1
+    );
+
+    const sx=
+      (video.videoWidth-size)/2;
+
+    const sy=
+      (video.videoHeight-size)/2;
+
+    ctx.drawImage(
+      video,
+      sx,
+      sy,
+      size,
+      size,
+      0,
+      0,
+      size,
+      size
+    );
+
+    const image=
+      canvas.toDataURL(
+        "image/jpeg",
+        0.86
+      );
+
+    const token=
+      await getClerkToken();
+
+    const response=
+      await fetch(
+        "/api/analyze-skin",
+        {
+          method:"POST",
+
+          headers:{
+            "Content-Type":
+              "application/json",
+
+            "Authorization":
+              "Bearer "+token,
+
+            "Accept":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+              image
+            })
+        }
+      );
+
+    const data=
+      await readLumeraJson(
+        response,
+        "/api/analyze-skin"
+      );
+
+    const analysis=
+      data.analysis||
+      data;
+
+    const score=
+      analysis.score ??
+      analysis.skinScore ??
+      analysis.skin_score ??
+      "—";
+
+    const concerns=
+      Array.isArray(
+        analysis.concerns
+      )
+        ? analysis.concerns
+        : (
+            Array.isArray(
+              analysis.issues
+            )
+              ? analysis.issues
+              : []
+          );
+
+    const needs=
+      Array.isArray(
+        analysis.needs
+      )
+        ? analysis.needs
+        : (
+            Array.isArray(
+              analysis.missing
+            )
+              ? analysis.missing
+              : []
+          );
+
+    const morning=
+      Array.isArray(
+        analysis.morningRoutine
+      )
+        ? analysis.morningRoutine
+        : (
+            Array.isArray(
+              analysis.morning_routine
+            )
+              ? analysis.morning_routine
+              : (
+                  Array.isArray(
+                    analysis.routine?.morning
+                  )
+                    ? analysis.routine.morning
+                    : []
+                )
+          );
+
+    const evening=
+      Array.isArray(
+        analysis.eveningRoutine
+      )
+        ? analysis.eveningRoutine
+        : (
+            Array.isArray(
+              analysis.night_routine
+            )
+              ? analysis.night_routine
+              : (
+                  Array.isArray(
+                    analysis.routine?.night
+                  )
+                    ? analysis.routine.night
+                    : []
+                )
+          );
+
+    const recommendations=
+      Array.isArray(
+        analysis.recommendations
+      )
+        ? analysis.recommendations
+        : [];
+
+    document.getElementById(
+      "scoreNumber"
+    ).textContent=
+      score;
+
+    const numericScore=
+      Number(score);
+
+    const scoreRing=
+      document.querySelector(
+        ".score"
+      );
+
+    if(
+      scoreRing &&
+      Number.isFinite(
+        numericScore
+      )
+    ){
+
+      const pct=
+        Math.max(
+          0,
+          Math.min(
+            10,
+            numericScore
+          )
+        )*10;
+
+      scoreRing.style.background=
+        `radial-gradient(
+          circle,
+          #09050e 57%,
+          transparent 58%
+        ),
+        conic-gradient(
+          #b66eff ${pct}%,
+          #281532 0
+        )`;
+    }
+
+    document.getElementById(
+      "concerns"
+    ).textContent=
+      concerns.length
+        ? concerns.join(" • ")
+        : (
+            analysis.summary ||
+            "No specific visible concerns were identified."
+          );
+
+    document.getElementById(
+      "needs"
+    ).textContent=
+      needs.length
+        ? needs.join(" • ")
+        : "Your analysis did not identify specific needs.";
+
+    let routineText="";
+
+    if(morning.length){
+
+      routineText+=
+        `Morning: ${morning.join(" → ")}. `;
+    }
+
+    if(evening.length){
+
+      routineText+=
+        `Evening: ${evening.join(" → ")}.`;
+    }
+
+    document.getElementById(
+      "routine"
+    ).textContent=
+      routineText.trim() ||
+      analysis.routine ||
+      "Your personalized routine will appear here.";
+
+    document.getElementById(
+      "recommendations"
+    ).textContent=
+      recommendations.length
+        ? recommendations.join(" • ")
+        : "Your personalized product recommendations will appear here.";
+
+    document.getElementById(
+      "analysisNote"
+    ).textContent=
+      analysis.note ||
+      analysis.message ||
+      "Check back with Luméra in about 3 days for another skin checkup.";
+
+    document.getElementById(
+      "result"
+    ).style.display=
+      "block";
+
+    document.getElementById(
+      "result"
+    ).scrollIntoView({
+      behavior:"smooth",
+      block:"center"
+    });
+
+    if(data.access){
+
+      currentAccount=
+        data.access;
+
+      updateScannerAccessDisplay(
+        data.access
+      );
+
+    }else{
+
+      refreshReturnedAccess();
+    }
+
+    statusEl.textContent=
+      "Analysis complete";
+
+    instruction.textContent=
+      "Your Luméra skin snapshot is ready. Check your results below.";
+
+  }catch(error){
+
+    console.error(
+      "Skin analysis error:",
+      error
+    );
+
+    statusEl.textContent=
+      "Analysis could not be completed";
+
+    instruction.textContent=
+      lumeraErrorMessage(
+        error,
+        "Please try the scan again."
+      );
+
+    alert(
+      lumeraErrorMessage(
+        error,
+        "The skin analysis failed. Please try again."
+      )
+    );
+
+  }finally{
+
+    stopCamera();
+  }
+}
+
+function stopCamera(){
+
+  if(cameraStream){
+
+    cameraStream
+      .getTracks()
+      .forEach(
+        track=>
+          track.stop()
+      );
+
+    cameraStream=null;
+  }
+
+  const video=
+    document.getElementById(
+      "camera"
+    );
+
+  if(video){
+    video.srcObject=null;
+  }
+
+  const button=
+    document.getElementById(
+      "beginAnalysis"
+    );
+
+  if(button){
+
+    button.style.display=
+      "inline-flex";
+  }
+
+  scanRunning=false;
+}
+
+async function signOut(){
+
+  try{
+
+    const clerk=
+      await ensureClerk();
+
+    await clerk.signOut();
+
+    currentUser=null;
+    currentAccount=null;
+
+    stopCamera();
+
+    document.getElementById(
+      "scanner"
+    ).style.display="none";
+
+    updateAccountUI();
+
+    updateScannerAccessDisplay({
+      scan_credits:0,
+      plan:null,
+      plan_expires_at:null,
+      status:null
+    });
+
+  }catch(error){
+
+    console.error(
+      "Luméra sign-out error:",
+      error
+    );
+  }
+}
+
+async function refreshReturnedAccess(){
+
+  try{
+
+    if(!currentUser)return;
+
+    const raw=
+      await getAccount();
+
+    const account=
+      raw?.account||
+      raw||
+      {};
+
+    currentAccount=
+      account;
+
+    updateScannerAccessDisplay(
+      account
+    );
+
+  }catch(error){
+
+    console.warn(
+      "Luméra access refresh failed:",
+      error
+    );
+  }
+}
+
+async function init(){
+
+  try{
+
+    const clerk=
+      await ensureClerk();
+
+    currentUser=
+      clerk.user||null;
+
+    updateAccountUI();
+
+    const url=
+      new URL(
+        window.location.href
+      );
+
+    const urlPlan=
+      url.searchParams.get(
+        "plan"
+      );
+
+    if(
+      urlPlan &&
+      PAYSTACK_LINKS[urlPlan]
+    ){
+
+      setPendingPlan(
+        urlPlan
+      );
+    }
+
+    const authReturn=
+      url.searchParams.get(
+        "lumera_auth_return"
+      );
+
+    const savedPlan=
+      getPendingPlan();
+
+    if(currentUser){
+
+      await refreshReturnedAccess();
+
+      if(
+        (authReturn||savedPlan) &&
+        savedPlan &&
+        PAYSTACK_LINKS[savedPlan]
+      ){
+
+        setTimeout(
+          ()=>{
+            continueToPaystack(
+              savedPlan
+            ).catch(
+              error=>{
+                console.error(
+                  "Return-to-payment error:",
+                  error
+                );
+
+                alert(
+                  lumeraErrorMessage(
+                    error,
+                    "Could not continue to Paystack."
+                  )
+                );
+              }
+            );
+          },
+          300
+        );
+      }
+    }
+
+  }catch(error){
+
+    console.error(
+      "Luméra initialization error:",
+      error
+    );
+  }
+}
+
+window.addEventListener(
+  "load",
+  init
+);
+
+window.addEventListener(
+  "pageshow",
+  ()=>{
+    if(currentUser)
+      refreshReturnedAccess();
+  }
+);
+
+document.addEventListener(
+  "visibilitychange",
+  ()=>{
+    if(
+      !document.hidden &&
+      currentUser
+    ){
+      refreshReturnedAccess();
+    }
+  }
+);
+</script>
+
+</body>
+</html>
